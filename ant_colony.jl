@@ -132,41 +132,42 @@ function init_ants(
 		)
 end
 
-# ╔═╡ e9451707-1c67-494f-813f-2b45ec7675c7
-function simulation_step!(
-		simulation_map,
+# ╔═╡ 8242293f-3195-4b65-8fe2-dde03ac72a76
+md"""
+__Loop of the simulation__
+* updates pheromone values
+* updates performs next action of the ant
+"""
+
+# ╔═╡ a4639a6f-3db7-4b5b-ac88-fae8c6d30d0f
+md"""
+__Update of pheromones__
+
+Fades pheromone with the following rule:
+```
+	new_pheromone_value = old_pheromone_value - fade_rate
+```
+
+Difuses pheromone with the following rule:
+```
+	new_pheromone_value = mean_of_the_neighborhood_pheromones
+```
+"""
+
+# ╔═╡ 7813d6fe-94ca-4278-9d6f-6d31a19eb765
+function simulation_step_ants!(
+		simulation_map, 
 		ants,
-		model_parameters	
-	#	probability_generation = 0.1,
+		model_parameters
 	)
+	
+	place_pheromone(coord, returning) =
+		returning ? 
+			simulation_map.nest_pheromones[coord[1], coord[2]] = 1 : simulation_map.food_pheromones[coord[1], coord[2]] = 1
 
-	# Pheromone rules:
-	pheromone_fade(x) = 
-		x < model_parameters.pheromone_fade_rate ? 
-			0 : x - model_parameters.pheromone_fade_rate
-	
-	pheromone_difusion(x, neighbors) = mean(neighbors)
+	neighbors(coord, orientation) = 
 
-	print(model_parameters.pheromone_fade_rate)
-
-	simulation_map.food_pheromones .= 
-		pheromone_fade.(simulation_map.food_pheromones)
-	simulation_map.nest_pheromones .= 
-		pheromone_fade.(simulation_map.nest_pheromones)
-	
-	
-	
-	# neighbors_rule = Neighbors(Moore(1)) do data, neighborhood, cell, I
-	# 	# Doplnte pravidla game of life
-	# 	# if podminka
-	# 	#   kod
-	# 	# end
-	# 	# sum - soucet
-	# 	# neighborhood - pole hodnot sousedu
-	# 	# cell - aktualni hodnota policka
-	# 	true
- #    end
-	
+	place_pheromone.(ants.positions, ants.going_home)
 	
 end
 
@@ -183,6 +184,51 @@ function get_neighborhood(
 			min(size(matrix)[2], coordinates[2] + neighborhood_size)
 		]
 	
+end
+
+# ╔═╡ 4f876c82-6c94-4b92-93f6-77e6814e4402
+function simulation_step_pheromones!(
+		simulation_map,
+		model_parameters
+	)
+	
+	map_2d_indices = CartesianIndices(simulation_map.food_pheromones)
+
+	# Pheromone rules:
+	pheromone_fade(x) = 
+		x < model_parameters.pheromone_fade_rate ? 
+			0 : x - model_parameters.pheromone_fade_rate
+	
+	pheromone_difusion(A) = 
+		reshape(
+			[Statistics.mean(get_neighborhood(A, map_2d_indices[iter])) 
+				for iter in	eachindex(A)
+			], 
+			size(A)
+		)
+
+	# Update pheromones (fade and difusion):
+	simulation_map.food_pheromones .= 
+		pheromone_fade.(simulation_map.food_pheromones)
+	simulation_map.nest_pheromones .= 
+		pheromone_fade.(simulation_map.nest_pheromones)
+
+	simulation_map.food_pheromones .=
+		pheromone_difusion(simulation_map.food_pheromones)
+	simulation_map.nest_pheromones .=	
+		pheromone_difusion(simulation_map.nest_pheromones)
+end
+
+# ╔═╡ e9451707-1c67-494f-813f-2b45ec7675c7
+function simulation_step!(
+		simulation_map,
+		ants,
+		model_parameters	
+	#	probability_generation = 0.1,
+	)
+
+	simulation_step_pheromones!(simulation_map, model_parameters)
+	simulation_step_ants!(simulation_map, ants, model_parameters)
 end
 
 # ╔═╡ de8d75b7-1150-47d2-9faa-7903cc5c2191
@@ -205,7 +251,8 @@ begin
 	place_to_map!(simulation_map.nest_pheromones, pheromone_coordinates, 1)
 	simulation_step!(simulation_map, ants, model_parameters)
 	display(simulation_map.food_pheromones)
-	display(simulation_map.nest_pheromones)
+	# display(simulation_map.nest_pheromones)
+
 	# print(model_parameters.probability_generation)
 end
 
@@ -1128,7 +1175,11 @@ version = "1.4.1+0"
 # ╠═eec95f9a-ba0f-45e5-b90c-55433fa05df4
 # ╟─d1e1c46a-9812-4aa3-9b64-2a2b531836cf
 # ╠═7566c3af-517c-453a-9b68-b3bac7a124ac
+# ╟─8242293f-3195-4b65-8fe2-dde03ac72a76
 # ╠═e9451707-1c67-494f-813f-2b45ec7675c7
+# ╟─a4639a6f-3db7-4b5b-ac88-fae8c6d30d0f
+# ╠═4f876c82-6c94-4b92-93f6-77e6814e4402
+# ╠═7813d6fe-94ca-4278-9d6f-6d31a19eb765
 # ╠═a0024991-f93d-463c-9001-3f3c22528b9b
 # ╠═de8d75b7-1150-47d2-9faa-7903cc5c2191
 # ╠═f9a3c633-a4d3-4368-88a9-06ae7e4eaba3
