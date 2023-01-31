@@ -21,10 +21,18 @@ OBSTACLE, FREE, NEST, FOOD, TRAP = -1, 0, 1, 2, 3
 # ╔═╡ 01b88ac4-4a69-4259-8d46-16796ee9b3ea
 md"""
 __Ant orientations__
+
+Each orientation is represented by the tuple which signifies all possible movements \
+of the ant which is heading on the given position.
+
+For example:
+	(-1, 0) - first number means that ant can move to position which differs in first 
+	coordinate by -1 (continue forward), second number means that ant can move to both
+	neighboring position in second coordinate (turn left or right)
 """
 
 # ╔═╡ b9b139f8-2672-4547-80e0-aadb0714c62f
-NORTH, EAST, SOUTH, WEST = 0, 1, 2, 3
+NORTH, EAST, SOUTH, WEST = (0, -1), (1, 0), (0, 1), (-1, 0)
 
 # ╔═╡ 06720cf4-e09d-4f14-901d-a4f2ab6e851c
 md"""
@@ -65,7 +73,7 @@ __All Ants__
 # ╔═╡ 4ff5c174-ba68-493a-98c5-55196d7601f5
 struct Ants
 	positions::Vector{Tuple{Integer, Integer}}
-	orientations::Vector{Integer}
+	orientations::Vector{Tuple{Integer, Integer}}
 	going_home::Vector{Bool}
 end
 
@@ -127,7 +135,7 @@ function init_ants(
 
 	return Ants(
 			[(rand(i[1]), rand(i[2])) for i in rand(nest_coordinates, num_ants)],
-			rand(NORTH:WEST, num_ants),
+			rand([NORTH, EAST, SOUTH, WEST], num_ants),
 			zeros(Bool, num_ants)
 		)
 end
@@ -160,13 +168,30 @@ function simulation_step_ants!(
 		ants,
 		model_parameters
 	)
-	
+
+	# Places pheromone on given coordinates.
 	place_pheromone(coord, returning) =
 		returning ? 
 			simulation_map.nest_pheromones[coord[1], coord[2]] = 1 : simulation_map.food_pheromones[coord[1], coord[2]] = 1
 
-	neighbors(coord, orientation) = 
+	function turn_ant(orient)
+		if orient == NORTH
+			return EAST
+		elseif orient == EAST
+			return SOURTH
+		elseif orient == SOUTH
+			return WEST
+		elseif orient == WEST
+			return NORTH
+		end
+	end
 
+	# Performs next step of the ant (moves to random position or turns right (if no move possible))
+	next_step(coord, orientation) = 
+		let moves = 
+			get_possible_moves(coord, orientation, simulation_map.map_objects)
+		do ismepty(moves) ? ants.turn_ant(orientation) : 
+		
 	place_pheromone.(ants.positions, ants.going_home)
 	
 end
@@ -231,6 +256,54 @@ function simulation_step!(
 	simulation_step_ants!(simulation_map, ants, model_parameters)
 end
 
+# ╔═╡ b48bc8f7-7577-41b2-b611-426e394436fb
+function get_possible_moves(
+		coordinates,
+		orientation,
+		map_objects
+	)
+
+	first_coord = coordinates[1]
+	second_coord = coordinates[2]
+	all_moves = []
+	
+	set_coord(i, how) = 
+		i == 1 ? (first_coord + how, second_coord) : (first_coord, second_coord + how)
+	
+	add_coordinate(coord) = #let coord = set_coord(i, how) 
+		#do 
+		map_objects[coord[1], coord[2]] == OBSTACLE ?
+			nothing : push!(all_moves, coord)
+		
+	for i in 1:2
+		if orientation[i] == 0
+			coordinates[i] == 1 ? 
+				 nothing : add_coordinate(set_coord(i, -1))#let new_coord = set_coord(i, -1)push!(all_moves, set_coord(i, -1))
+			coordinates[i] == size(map_objects)[i] ? 
+				 nothing : add_coordinate(set_coord(i, 1)) #push!(all_moves, set_coord(i, +1))
+		else
+			new_coord = set_coord(i, orientation[i])
+			new_coord[i] < 1 || new_coord[i] > size(map_objects)[i] ? 
+				nothing : add_coordinate(new_coord)#push!(all_moves, new_coord)
+		end
+	end
+
+	return all_moves
+end
+
+# ╔═╡ cab3bbd9-c1dd-4f4a-94ce-612f52a7e7c8
+function turn_ant(orient)
+	if orient == NORTH
+		return EAST
+	elseif orient == EAST
+		return SOURTH
+	elseif orient == SOUTH
+		return WEST
+	elseif orient == WEST
+		return NORTH
+	end
+end
+
 # ╔═╡ de8d75b7-1150-47d2-9faa-7903cc5c2191
 # create_map()
 
@@ -245,12 +318,19 @@ begin
 	# print(typeof(simulation_map.nest_coordinates))
 	# print(rand(arr, 20))
 	ants = init_ants(simulation_map.nest_coordinates, 50)
+	# print(ants.orientations)
 	pheromone_coordinates = [(1:4, 1:2)]
+	x = (5, 4)
+	b = x[1] + 1 
+	# print(b)
+	place_to_map!(simulation_map.map_objects, [(1:2, 2:3)], OBSTACLE)
+	display(transpose(simulation_map.map_objects))
+	print(isempty(get_possible_moves((1, 1), WEST, simulation_map.map_objects)))
 
 	place_to_map!(simulation_map.food_pheromones, pheromone_coordinates, 1)
 	place_to_map!(simulation_map.nest_pheromones, pheromone_coordinates, 1)
 	simulation_step!(simulation_map, ants, model_parameters)
-	display(simulation_map.food_pheromones)
+	# display(simulation_map.food_pheromones)
 	# display(simulation_map.nest_pheromones)
 
 	# print(model_parameters.probability_generation)
@@ -1160,7 +1240,7 @@ version = "1.4.1+0"
 # ╔═╡ Cell order:
 # ╠═977b71d0-9c95-11ed-3c8a-45665d8bb919
 # ╠═a0d827a2-eee1-4b45-a12b-0f5c7ba7d937
-# ╠═f20a15ba-5eeb-49d6-96bb-61904cbf0a3b
+# ╟─f20a15ba-5eeb-49d6-96bb-61904cbf0a3b
 # ╠═2ee43943-7253-40ef-b05a-a1db2b6f7aac
 # ╟─01b88ac4-4a69-4259-8d46-16796ee9b3ea
 # ╠═b9b139f8-2672-4547-80e0-aadb0714c62f
@@ -1181,6 +1261,8 @@ version = "1.4.1+0"
 # ╠═4f876c82-6c94-4b92-93f6-77e6814e4402
 # ╠═7813d6fe-94ca-4278-9d6f-6d31a19eb765
 # ╠═a0024991-f93d-463c-9001-3f3c22528b9b
+# ╠═b48bc8f7-7577-41b2-b611-426e394436fb
+# ╠═cab3bbd9-c1dd-4f4a-94ce-612f52a7e7c8
 # ╠═de8d75b7-1150-47d2-9faa-7903cc5c2191
 # ╠═f9a3c633-a4d3-4368-88a9-06ae7e4eaba3
 # ╟─00000000-0000-0000-0000-000000000001
