@@ -108,15 +108,19 @@ end
 
 # ╔═╡ e2aa2184-b8ae-4f98-9b34-d9b4110b9095
 function create_map(;
-		grid_size = (20, 20), 
+		grid_size = (100, 100), 
+		# grid_size = (20, 20), 
 		random_init = false,
 		# nest_coordinates = [(10:19, 15:19), (1:7, 4:9), (1:1, 1:1)]
 	)
 
 	map_objects = zeros(Integer, grid_size)
 	# Init nest
-	food_coordinates = [(10:19, 15:19), (1:7, 4:9), (1:1, 1:1)]
-	nest_coordinates = [(12:13, 12:13)] #, (15:17, 1:5)]
+	# food_coordinates = [(10:19, 15:19), (1:7, 4:9), (1:1, 1:1)]
+	# nest_coordinates = [(12:13, 12:13)] #, (15:17, 1:5)]
+
+	food_coordinates = [(10:30, 10:20), (80:90, 85:95)]
+	nest_coordinates = [(50:52, 50:52)]
 	obstacle_coordinates = [(1:4, 10:11)]
 
 	place_to_map!(map_objects, food_coordinates, FOOD)
@@ -364,16 +368,26 @@ from the weighted distribution where weights are pheromone levels on given
 positions.
 """
 
+# ╔═╡ f5a402ff-5552-413a-947a-74cb7c1e8659
+NORMALIZATION_PARAMETER = 0.3
+
 # ╔═╡ d7bf15ca-58fa-4e9b-af6e-bcc30a5b5631
 function randomly_choose_move(possible_moves, pheromone_map)
 	
 	sample(items, weights) = items[findfirst(cumsum(weights) .> rand())]
 
 	# Find weights of each move and normalise them.
-	weights = [pheromone_map[coord[1], coord[2]] for coord in possible_moves]
+	weights = [pheromone_map[coord[1], coord[2]] + NORMALIZATION_PARAMETER for coord in possible_moves]
 	weights ./= sum(weights)
 
-	return sum(weights) > 0 ? sample(possible_moves, weights) : possible_moves[1]
+	print(rand(1:size(possible_moves)[1]))
+	x = sum(weights) > 0 ? sample(possible_moves, weights) : possible_moves[rand(1:size(possible_moves)[1])]
+
+	print(x)
+
+	return x
+
+	# return sum(weights) > 0 ? sample(possible_moves, weights) : possible_moves[rand(1:size(possible_moves))]
 end
 
 # ╔═╡ c2c81457-e0d7-44e6-8cdb-17121ad3ccaa
@@ -444,6 +458,12 @@ function simulation_step_ants!(
 		returning ? 
 			simulation_map.nest_pheromones[coord[1], coord[2]] = 1 : simulation_map.food_pheromones[coord[1], coord[2]] = 1
 
+	# place_pheromone(coord, returning) =
+	# 	returning ? 
+	# 		# simulation_map.nest_pheromones[coord[1], coord[2]] = 1 :
+	# 		simulation_map.food_pheromones[coord[1], coord[2]] = 1 :
+	# 		simulation_map.nest_pheromones[coord[1], coord[2]] = 1
+	
 	ants_food_managment!(simulation_map, ants)
 	ants_movement!(simulation_map, ants, model_parameters)
 	place_pheromone.(ants.positions, ants.going_home)
@@ -477,25 +497,54 @@ function sim!(
 		FOOD => hex2rgba(0x7A871E),
 		TRAP => hex2rgba(0x159874)
 	)
+
+	set_color(rgb, alpha) = Plots.RGBA(rgb[1], rgb[2], rgb[3], alpha)
 	
+	(x_size, y_size) = size(simulation_map.map_objects)
+	num_ants = size(ants.positions)[1]
+
+	print(num_ants)
 	
-	output_map_objects = []
-	output_food_pheromones = []
-	output_nest_pheromones = []
-	output_ants = [] 
-	output_food_counter = []
+	output_map_objects = zeros(Integer, x_size, y_size, num_steps)
+	output_food_pheromones = zeros(Float64, x_size, y_size, num_steps)
+	output_nest_pheromones = zeros(Float64, x_size, y_size, num_steps)
+	output_ants_positions = Array{Tuple{Int, Int}, (num_ants, num_steps)}
+	#zeros(Tuple, num_ants, num_steps)
+	output_ants_going_home = zeros(Bool, num_ants, num_steps)
+	output_food_counter = zeros(num_steps)
 		
 	
 	for i in 1:num_steps
-		println(i)
+		# println(i)
 		simulation_step!(simulation_map, ants, model_parameters)
+		output_map_objects[:, :, i] .= simulation_map.map_objects
+		output_food_pheromones[:, :, i] .= simulation_map.food_pheromones
+		output_nest_pheromones[:, :, i] .= simulation_map.nest_pheromones
+		# output_ants_positions[:, i] .= ants.positions
+		# output_ants_going_home[:, i] .= ants.going_home
+		output_food_counter[i] = ants.nest_food[]
 	end
+
+	animation = Plots.@animate for i in 1:num_steps
+		Plots.plot!(map(s -> s_colors[s], output_map_objects[:, :, i]))
+    	Plots.plot!(map(s -> set_color((250, 0, 0), s), output_food_pheromones[:, :, i]))
+		Plots.plot!(map(s -> set_color((0, 250, 0), s), output_nest_pheromones[:, :, i]))
+	end
+
+   
+	
+	Plots.gif(animation, fps=10)
+
+	# display(output_food_counter)
 end
+
+# ╔═╡ 8bcca12c-8a17-4296-9a46-40d277fc504f
+
 
 # ╔═╡ f9a3c633-a4d3-4368-88a9-06ae7e4eaba3
 begin
 	simulation_map = create_map()
-	model_parameters = ModelParameters(0.01, 0.1)
+	model_parameters = ModelParameters(0.01, 0.02)
 	food_counter = 0
 	# arr = [true, false]
 
@@ -520,7 +569,7 @@ begin
 	# simulation_step_ants!(simulation_map, ants, model_parameters)
 	# display(simulation_map.food_pheromones)
 	# display(simulation_map.nest_pheromones)
-	sim!(simulation_map, ants, model_parameters)
+	sim!(simulation_map, ants, model_parameters, 500)
 
 	# print(model_parameters.probability_generation)
 end
@@ -1462,8 +1511,10 @@ version = "1.4.1+0"
 # ╟─3d9724d0-05b0-4f50-b3d5-1f7c0a2e353e
 # ╠═cab3bbd9-c1dd-4f4a-94ce-612f52a7e7c8
 # ╟─0e5e55fd-4645-41cc-89de-cff3f59ab0b9
+# ╠═f5a402ff-5552-413a-947a-74cb7c1e8659
 # ╠═d7bf15ca-58fa-4e9b-af6e-bcc30a5b5631
 # ╠═756e733e-a2d9-44cb-aad3-1a89706e6075
+# ╠═8bcca12c-8a17-4296-9a46-40d277fc504f
 # ╠═f9a3c633-a4d3-4368-88a9-06ae7e4eaba3
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
