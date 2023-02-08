@@ -119,7 +119,7 @@ function create_map(;
 	# food_coordinates = [(10:19, 15:19), (1:7, 4:9), (1:1, 1:1)]
 	# nest_coordinates = [(12:13, 12:13)] #, (15:17, 1:5)]
 
-	food_coordinates = [(10:30, 10:20), (80:90, 85:95)]
+	food_coordinates = [(10:30, 10:20), (180:190, 185:195)]
 	nest_coordinates = [(50:52, 50:52)]
 	obstacle_coordinates = [(1:4, 10:11)]
 
@@ -454,15 +454,15 @@ function simulation_step_ants!(
 	)
 
 	# Places pheromone on given coordinates.
-	place_pheromone(coord, returning) =
-		returning ? 
-			simulation_map.nest_pheromones[coord[1], coord[2]] = 1 : simulation_map.food_pheromones[coord[1], coord[2]] = 1
-
 	# place_pheromone(coord, returning) =
 	# 	returning ? 
-	# 		# simulation_map.nest_pheromones[coord[1], coord[2]] = 1 :
-	# 		simulation_map.food_pheromones[coord[1], coord[2]] = 1 :
-	# 		simulation_map.nest_pheromones[coord[1], coord[2]] = 1
+	# 		simulation_map.nest_pheromones[coord[1], coord[2]] = 1 : simulation_map.food_pheromones[coord[1], coord[2]] = 1
+
+	place_pheromone(coord, returning) =
+		returning ? 
+			# simulation_map.nest_pheromones[coord[1], coord[2]] = 1 :
+			simulation_map.food_pheromones[coord[1], coord[2]] = 1 :
+			simulation_map.nest_pheromones[coord[1], coord[2]] = 1
 	
 	ants_food_managment!(simulation_map, ants)
 	ants_movement!(simulation_map, ants, model_parameters)
@@ -496,6 +496,11 @@ function sim!(
 		NEST => hex2rgba(0xFF4500),
 		FOOD => hex2rgba(0x7A871E),
 		TRAP => hex2rgba(0x159874)
+		# OBSTACLE => Plots.RGBA(255, 0, 0, 1),#hex2rgba(0xFF0000),
+		# FREE => Plots.RGBA(0, 0, 0, 0.05),#hex2rgba(0x000000),
+		# NEST => Plots.RGBA(120, 120, 0, 1),#hex2rgba(0xFF4500),
+		# FOOD => Plots.RGBA(0, 255, 0, 1),#hex2rgba(0x7A871E),
+		# TRAP => Plots.RGBA(255, 0, 0, 1)#hex2rgba(0x159874)
 	)
 
 	set_color(rgb, alpha) = Plots.RGBA(rgb[1], rgb[2], rgb[3], alpha)
@@ -505,31 +510,67 @@ function sim!(
 
 	print(num_ants)
 	
-	output_map_objects = zeros(Integer, x_size, y_size, num_steps)
-	output_food_pheromones = zeros(Float64, x_size, y_size, num_steps)
-	output_nest_pheromones = zeros(Float64, x_size, y_size, num_steps)
-	output_ants_positions = Array{Tuple{Int, Int}, (num_ants, num_steps)}
-	#zeros(Tuple, num_ants, num_steps)
-	output_ants_going_home = zeros(Bool, num_ants, num_steps)
+	# output_map_objects = zeros(Integer, x_size, y_size, num_steps)
+	# output_food_pheromones = zeros(Float64, x_size, y_size, num_steps)
+	# output_nest_pheromones = zeros(Float64, x_size, y_size, num_steps)
+	# output_ants_positions = Array{Tuple{Int, Int}, (num_ants, num_steps)}
+	# #zeros(Tuple, num_ants, num_steps)
+	# output_ants_going_home = zeros(Bool, num_ants, num_steps)
 	output_food_counter = zeros(num_steps)
 		
 	
 	for i in 1:num_steps
 		# println(i)
-		simulation_step!(simulation_map, ants, model_parameters)
-		output_map_objects[:, :, i] .= simulation_map.map_objects
-		output_food_pheromones[:, :, i] .= simulation_map.food_pheromones
-		output_nest_pheromones[:, :, i] .= simulation_map.nest_pheromones
+		# simulation_step!(simulation_map, ants, model_parameters)
+		# output_map_objects[:, :, i] .= simulation_map.map_objects
+		# output_food_pheromones[:, :, i] .= simulation_map.food_pheromones
+		# output_nest_pheromones[:, :, i] .= simulation_map.nest_pheromones
 		# output_ants_positions[:, i] .= ants.positions
 		# output_ants_going_home[:, i] .= ants.going_home
 		output_food_counter[i] = ants.nest_food[]
 	end
 
+	# objects_color = map(s -> set_color((250, 0, 0), s), output_food_pheromones[:, :, 1])
+
+	# choose_highes(x, y, z) =
+
+	choose_color(object, food_pheromone, nest_pheromone) = 
+		food_pheromone == 0 && nest_pheromone == 0 ?
+			s_colors[object] : 
+			(food_pheromone > nest_pheromone ?
+				set_color((250, 0, 0), food_pheromone) : 
+				set_color((0, 250, 0), nest_pheromone))
+			# ((set_color((250, 0, 0), food_pheromone) + 
+			# set_color((0, 250, 0), nest_pheromone))/2)
+				
+
+	# usecolorscheme(2)
+	# display(x)
+	p = Plots.plot(map(s -> s_colors[s], simulation_map.map_objects), background_color=:black, foreground_color=:black)
+	
 	animation = Plots.@animate for i in 1:num_steps
-		Plots.plot!(map(s -> s_colors[s], output_map_objects[:, :, i]))
-    	Plots.plot!(map(s -> set_color((250, 0, 0), s), output_food_pheromones[:, :, i]))
-		Plots.plot!(map(s -> set_color((0, 250, 0), s), output_nest_pheromones[:, :, i]))
-	end
+		# objects_colors = map(s -> s_colors[s], output_map_objects[:, :, i])
+		# food_pheromone_colors = map(s -> set_color((250, 0, 0), s), output_food_pheromones[:, :, i])
+		# nest_pheromone_colors = map(s -> set_color((0, 250, 0), s), output_nest_pheromones[:, :, i])
+
+		simulation_step!(simulation_map, ants, model_parameters)
+		output_food_counter[i] = ants.nest_food[]
+		
+		result_colors = map(choose_color, 
+			simulation_map.map_objects, 
+			simulation_map.food_pheromones, 
+			simulation_map.nest_pheromones)
+		
+		# result_colors = map(choose_color, 
+		# 	output_map_objects[:, :, i], 
+		# 	output_food_pheromones[:, :, i], 
+		# 	output_nest_pheromones[:, :, i])
+
+		p[1][1][:z] = result_colors
+		# Plots.plot!(map(s -> s_colors[s], output_map_objects[:, :, i]))
+  #   	Plots.plot!(map(s -> set_color((250, 0, 0), s), output_food_pheromones[:, :, i]))
+		# Plots.plot!(map(s -> set_color((0, 250, 0), s), output_nest_pheromones[:, :, i]))
+	end every 10
 
    
 	
@@ -543,7 +584,7 @@ end
 
 # ╔═╡ f9a3c633-a4d3-4368-88a9-06ae7e4eaba3
 begin
-	simulation_map = create_map()
+	simulation_map = create_map(grid_size=(200, 200))
 	model_parameters = ModelParameters(0.01, 0.02)
 	food_counter = 0
 	# arr = [true, false]
@@ -572,6 +613,21 @@ begin
 	sim!(simulation_map, ants, model_parameters, 500)
 
 	# print(model_parameters.probability_generation)
+
+	
+	# x = Plots.RGBA(100, 100, 100, 0.5)
+	# y = Plots.RGBA(50, 10, 200, 1.4)
+
+	# print(x)
+	# maximum(m -> m[4], [x, y])
+
+	# arr_x = [x x; y y]
+
+	# arr_res = (arr_x + arr_x) / 2
+
+	# z = x + y 
+	# print(z)
+	# display(arr_res)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
