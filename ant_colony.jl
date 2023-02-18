@@ -230,6 +230,8 @@ function simulation_step_pheromones!(
 	
 	map_2d_indices = CartesianIndices(simulation_map.food_pheromones)
 
+	# display(map_2d_indices)
+
 	# Pheromone rules:
 	pheromone_fade(x) = 
 		x < model_parameters.pheromone_fade_rate ? 
@@ -238,10 +240,14 @@ function simulation_step_pheromones!(
 	# Lets fragment of the pheromone on original position and the rest difuses.
 	pheromone_difusion(grid) = 
 		reshape(
-			[model_parameters.pheromone_difusion_rate * 
-				grid[map_2d_indices[iter]] + 
-			(1-model_parameters.pheromone_difusion_rate) * 
-				Statistics.mean(get_neighborhood(grid, map_2d_indices[iter])) 
+			[simulation_map.map_objects[map_2d_indices[iter]] == OBSTACLE ? 		
+				# Obstacle -> pheromone level is always zero.
+				0 :
+				# Not obstacle -> difuse pheromone.
+				model_parameters.pheromone_difusion_rate * 
+					grid[map_2d_indices[iter]] + 
+				(1-model_parameters.pheromone_difusion_rate) * 
+					Statistics.mean(get_neighborhood(grid, map_2d_indices[iter])) 
 			for iter in	eachindex(grid)
 			], 
 			size(grid)
@@ -457,17 +463,6 @@ function randomly_choose_move(
 			possible_moves[rand(1:size(possible_moves)[1])]
 end
 
-# ╔═╡ 51ee9094-fdf8-4631-81da-cb262200579a
-md"""
-__Managment of the ant movement__
-
-Ant can move only in 3 directions (left, towards and right). The choice of 
-the direction is random and dependds on the amount of the corresponding pheromone 
-levels on the possible positions. If the food (resp. nest) is nearby, then ant 
-always moves towards the food (resp. nest). If no movement possible the ant 
-randomly turns in place.
-"""
-
 # ╔═╡ c2c81457-e0d7-44e6-8cdb-17121ad3ccaa
 """
 	ants_movement!(simulation_map, ants, model_parameter)
@@ -678,6 +673,7 @@ begin
 	ONLY_PHEROMONE_ANIM = 1
 	ANTS_ANIM = 2
 	ONLY_ANTS_ANIM = 3
+	PHEROMONE_ANTS_ANIM = 4
 end
 
 # ╔═╡ a93d44f2-a1d8-4389-8151-3b040b0873a0
@@ -691,7 +687,7 @@ end
 Set proper animation frame of the current state of `simulation_map` and `ants`.
 
 # Arguments
-- `animation_type=PHEROMONE_ANIM`: animation type switch (possible options: `PHEROMONE_ANIM` - animate pheromone levels with map objects, `ONLY_PHEROMONE_ANIM` - animate only pheromone levels, `ANTS_ANIM` - animate ants with map objects, `ONLY_ANTS_ANIM` - animate only ants)
+- `animation_type=PHEROMONE_ANIM`: animation type switch (possible options: `PHEROMONE_ANIM` - animate pheromone levels with map objects, `ONLY_PHEROMONE_ANIM` - animate only pheromone levels, `ANTS_ANIM` - animate ants with map objects, `ONLY_ANTS_ANIM` - animate only ants, `PHEROMONE_ANTS_ANIM` - animate both pheromone and ants)
 - `color_normalization=1`: parameter to adjust color intensity of the pheromone
 """
 function choose_animation(
@@ -751,9 +747,22 @@ function choose_animation(
 				set_color(NEST_PHER_COLOR, 1.0)
 		end
 	elseif animation_type == ONLY_PHEROMONE_ANIM
-		result_colors = map(set_pheromone_color, simulation_map.food_pheromones, simulation_map.nest_pheromones)
+		result_colors = 
+			map(set_pheromone_color, 
+				simulation_map.food_pheromones, simulation_map.nest_pheromones)
 	elseif animation_type == ONLY_ANTS_ANIM
 		result_colors = map(s -> Plots.RGBA(0, 0, 0, 0.0), simulation_map.map_objects)
+		for (coord, returning) in zip(ants.positions, ants.going_home)
+			result_colors[coord[1], coord[2]] = returning ? 
+				set_color(FOOD_PHER_COLOR, 1.0) :
+				set_color(NEST_PHER_COLOR, 1.0)
+		end
+	elseif animation_type == PHEROMONE_ANTS_ANIM
+		result_colors = map(color_map_objects_pheromones, 
+				simulation_map.map_objects, 
+				simulation_map.food_pheromones, 
+				simulation_map.nest_pheromones
+			)
 		for (coord, returning) in zip(ants.positions, ants.going_home)
 			result_colors[coord[1], coord[2]] = returning ? 
 				set_color(FOOD_PHER_COLOR, 1.0) :
@@ -782,7 +791,6 @@ Initialize the simulation.
 - `nest_coordinates=[(45:52, 55:62)]`
 - `obstacle_coordinates=[]`
 - `num_ants=400`
-- `num_iterations=1000`
 - `pheromone_fade_rate=0.0005`
 - `search_depth=20`
 - `pheromone_power=0.02`
@@ -799,7 +807,6 @@ function init_simulation(;
 		nest_coordinates = [(45:52, 55:62)],
 		obstacle_coordinates = [],
 		num_ants = 400,
-		num_iterations = 1000,
 		pheromone_fade_rate = 0.0005,
 		search_depth = 20,
 		pheromone_power = 0.02,
@@ -881,7 +888,7 @@ function sim!(
 			
 			simulation_step!(simulation_map, ants, model_parameters)
 	
-			p[1][1][:z] = choose_animation(simulation_map, ants)
+			p[1][1][:z] = choose_animation(simulation_map, ants, animation_type=animation_type)
 			Plots.title!("FOOD COUNTER: " * string(ants.nest_food[]))
 			
 		end every draw_each
@@ -892,68 +899,51 @@ function sim!(
 
 	else
 		for i in 1:num_iterations
-			simulation_step!(simulation_map, ants, model_paramters)
+			simulation_step!(simulation_map, ants, model_parameters)
 		end
+		return ants.nest_food[]
 	end
+
+	# return ants.nest_food[]
 end
+
+# ╔═╡ 95959428-ee7f-4557-a84a-0e2f82f9d27c
+# begin
+# 	sim!(init_simulation(
+# 				grid_size = (100, 100),
+# 				food_coordinates = [(1:15, 1:20), (80:100, 85:95)],
+# 				nest_coordinates = [(45:52, 55:62)],
+# 				obstacle_coordinates = [(1:7, 25:26), (9:18, 25:26), (18:19, 1:25),
+# 				(75:100, 80:80), (75:75, 80:93)],
+# 				# num_ants = 400,
+# 				pheromone_fade_rate = 0.0005,
+# 				search_depth = 20,
+# 				pheromone_power = 0.02,
+# 				difusion_rate = 0.7,
+# 				normalization_parameter = 0.0001,
+# 			)..., 
+# 			num_iterations=4000, 
+# 			animation_type=PHEROMONE_ANIM,
+# 			animate=true,
+# 			color_normalization = 0.01,
+# 		)
+# end
 
 # ╔═╡ f9a3c633-a4d3-4368-88a9-06ae7e4eaba3
-begin
-	# grid_size = (20, 20)
-	# food_coordinates = [(10:19, 15:19), (1:7, 4:9), (1:1, 1:1)]
-	# nest_coordinates = [(12:13, 12:13)] #, (15:17, 1:5)]
+# begin
+# 	sim!(init_simulation()...,
+# 			num_iterations=1000,
+# 			animation_type=PHEROMONE_ANIM,
+# 		)
+# end
 
-	# Default:
-	# grid_size = (200, 200)
-	# food_coordinates = [(10:30, 10:20), (10:30, 120:130), (180:190, 185:195)]
-	# nest_coordinates = [(40:52, 50:72)]
-	# obstacle_coordinates = [(1:4, 10:11)]
-
-	# print(rand() < 0.5)
-
-	# grid_size = (100, 100)
-	# food_coordinates = [(1:15, 1:20), (80:100, 85:95)]
-	# nest_coordinates = [(45:52, 55:62)]
-	# obstacle_coordinates = []
-	# # obstacle_coordinates = [(1:50, 30:31), (70:71, 80:99), (75:100, 78:79)]
-	
-	# num_ants = 400
-
-	print(Map)
-
-
-	num_iterations = 1000
-
-	# pheromone_fade_rate=0.0005
-	# search_depth = 20
-	# # search_depth = 3
-	# ant_pheromone_power = 0.02
-	# difustion_rate = 0.3
-	# normalization_parameter = 0.0001
-
-	
-	# simulation_map = create_map(grid_size=grid_size, food_coordinates=food_coordinates, nest_coordinates=nest_coordinates, obstacle_coordinates=obstacle_coordinates)
-	# model_parameters = ModelParameters(pheromone_fade_rate, search_depth, ant_pheromone_power, difustion_rate, normalization_parameter)
-	# food_counter = 0
-
-	# ants = init_ants(simulation_map.nest_coordinates, num_ants)
-
-	simulation_map, ants, model_parameters = init_simulation()
-
-	# print(Base.return_types(init_simulation))
-
-	sim!(init_simulation()..., 
-			num_iterations=1000,
-			animation_type=PHEROMONE_ANIM
-		)
-
-
-	# sim!(simulation_map, ants, model_parameters, num_iterations=num_iterations, animation_type=PHEROMONE_ANIM)
-
-	# for _ in 1:10
-		# println(rand() * NORMALIZATION_PARAMETER)
-	# end
-end
+# ╔═╡ 67065f32-9c47-4010-ab92-7f7e45f66a6f
+# begin
+# 	sim!(init_simulation()..., 
+# 			num_iterations=2000,
+# 			animation_type = PHEROMONE_ANTS_ANIM,
+# 		)
+# end
 
 # ╔═╡ 38e68fae-0200-4c9c-9f3a-df44d0b1bf36
 # begin
@@ -983,14 +973,36 @@ end
 # 				# num_ants = 400,
 # 				num_iterations = 1000,
 # 				pheromone_fade_rate = 0.0005,
-# 				search_depth = 10,
+# 				search_depth = 20,
 # 				pheromone_power = 0.02,
-# 				difusion_rate = 0.3,
-# 				normalization_parameter = 0.0001
+# 				difusion_rate = 0.7,
+# 				normalization_parameter = 0.0001,
 # 			)..., 
 # 			num_iterations=1000, 
-# 			animation_type=PHEROMONE_ANIM
+# 			animation_type=PHEROMONE_ANIM,
+# 			animate=true,
+# 			color_normalization = 0.01,
 # 		)
+# end
+
+# ╔═╡ af047c9d-7dfe-48f5-aa22-179b8ac34cb9
+# begin
+# 	sim!(init_simulation()..., animate=false)
+# end
+
+# ╔═╡ 34aeec52-136a-43ed-b6f6-c1242a386744
+# begin
+# 	# Parameters testing
+# 	difusion_rates = 0:0.1:1;
+	
+# 	for difusion in difusion_rates
+# 		println(sim!(init_simulation(
+# 			difusion_rate = difusion,
+# 				)...,
+# 				animate = false,
+# 			)
+# 		)
+# 	end
 # end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1919,7 +1931,6 @@ version = "1.4.1+0"
 # ╠═cab3bbd9-c1dd-4f4a-94ce-612f52a7e7c8
 # ╠═b48bc8f7-7577-41b2-b611-426e394436fb
 # ╠═d7bf15ca-58fa-4e9b-af6e-bcc30a5b5631
-# ╠═51ee9094-fdf8-4631-81da-cb262200579a
 # ╠═c2c81457-e0d7-44e6-8cdb-17121ad3ccaa
 # ╠═04ddea98-1582-47db-bc06-634dc28cf313
 # ╠═18b60e48-767f-4b52-aad9-322268af9931
@@ -1928,8 +1939,12 @@ version = "1.4.1+0"
 # ╠═8bcca12c-8a17-4296-9a46-40d277fc504f
 # ╟─9d048ca0-a9b0-4e06-a3a0-96cb30fb430d
 # ╠═756e733e-a2d9-44cb-aad3-1a89706e6075
+# ╠═95959428-ee7f-4557-a84a-0e2f82f9d27c
 # ╠═f9a3c633-a4d3-4368-88a9-06ae7e4eaba3
+# ╠═67065f32-9c47-4010-ab92-7f7e45f66a6f
 # ╠═38e68fae-0200-4c9c-9f3a-df44d0b1bf36
 # ╠═f23ed720-e268-446a-9226-a4bd3f306cab
+# ╠═af047c9d-7dfe-48f5-aa22-179b8ac34cb9
+# ╠═34aeec52-136a-43ed-b6f6-c1242a386744
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

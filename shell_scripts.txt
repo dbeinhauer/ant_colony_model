@@ -1,0 +1,2 @@
+Skript pro vypocet prumeru parametru 20 prikladu s nejlepsim vysledkem:
+sort -n -k4 output.txt | tail -n20 | awk -F'f-|d-|n-|:' '{print $2 $3 $4}' | awk '{for(i=1;i<=NF;i++)$i=(a[i]+=$i)}END {for(i=1;i<=NF;i++)$i/=NR} END {print}'
