@@ -17,6 +17,37 @@ include("ant_colony.jl")
 
 end
 
+# ╔═╡ b94e4c8c-5335-4e99-b92a-28d5a5b00b1b
+"""
+	print_experiment_header(title_line = "", parameters_line = "", table_header = "")
+
+Prints header of the experiment in appropriate format based on the arguments.
+"""
+function print_experiment_header(;
+		title_line::String = "",
+		parameters_line::String = "",
+		table_header::String = "",	
+	)
+	println(title_line)
+	println(parameters_line)
+	println("---------------------------------------------------")	
+	println(table_header)
+	println("---------------------------------------------------")
+end
+
+# ╔═╡ 1f1d6b11-6d87-4ff2-81c7-0f2ba2ceffec
+"""
+	print_experiment_bottom()
+
+Prints tail of the experiment in appropriate format.
+"""
+function print_experiment_bottom()
+	println("---------------------------------------------------")
+	println("End of Experiment!")
+	println()
+	println()
+end
+
 # ╔═╡ 911cc6b0-474d-4856-94ca-f9fd6732ed34
 # begin
 # 	AntsModel.sim!(AntsModel.init_simulation()..., 
@@ -27,84 +58,425 @@ end
 # end
 
 # ╔═╡ ee4e8271-3aa3-43a3-9d80-7597963fce5b
-begin
-	AntsModel.sim!(
-		AntsModel.init_simulation(
-			pheromone_fade_rate = 0.0003,
-			search_depth = 10,
-			pheromone_power = 0.02,
-			difusion_rate = 0.85,
-			normalization_parameter = 0.0005,
-		)..., 
-		num_iterations=8000,
-		animation_type=AntsModel.PHEROMONE_ANTS_ANIM,
-		# animate=false,
-	)
-end
+# begin
+# 	AntsModel.sim!(
+# 		AntsModel.init_simulation(
+# 			pheromone_fade_rate = 0.00021,
+# 			search_depth = 10,
+# 			pheromone_power = 0.02,
+# 			difusion_rate = 0.495,
+# 			normalization_parameter = 0.0005,
+# 		)..., 
+# 		num_iterations=4000,
+# 		animation_type=AntsModel.PHEROMONE_ANTS_ANIM,
+# 		# animate=false,
+# 	)
+# end
 
 # ╔═╡ 749b49c9-303a-4202-8084-5088ace51dea
-begin
-	AntsModel.sim!(
-			AntsModel.init_simulation(
-				grid_size = (100, 100),
-				food_coordinates = [(1:15, 1:20), (80:100, 85:95)],
-				nest_coordinates = [(45:52, 55:62)],
-				obstacle_coordinates = [(1:7, 25:26), (9:18, 25:26), (18:19, 1:25),
-				(75:100, 80:80), (75:75, 80:93)],
-				# num_ants = 400,
-				pheromone_fade_rate = 0.0005,
-				search_depth = 20,
-				pheromone_power = 0.02,
-				difusion_rate = 0.7,
-				normalization_parameter = 0.0001,
-			)..., 
-			num_iterations=4000, 
-			animation_type=AntsModel.PHEROMONE_ANIM,
-			animate=true,
-			color_normalization = 0.01,
-		)
-end
+# begin
+# 	AntsModel.sim!(
+# 			AntsModel.init_simulation(
+# 				grid_size = (100, 100),
+# 				food_coordinates = [(1:15, 1:20), (80:100, 85:95)],
+# 				nest_coordinates = [(45:52, 55:62)],
+# 				obstacle_coordinates = [(1:7, 25:26), (9:18, 25:26), (18:19, 1:25),
+# 				(75:100, 80:80), (75:75, 80:93)],
+# 				# num_ants = 400,
+# 				search_depth = 20,
+# 			)..., 
+# 			num_iterations = 8000, 
+# 			animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animate = true,
+# 		)
+# end
+
+# ╔═╡ 3a0450e1-7009-4494-a8f2-514409a36727
+md"""
+## Experiments
+"""
+
+# ╔═╡ 2aa49e8a-0323-491d-a802-64ecbed69a70
+md"""
+### Grid Search Model Parameters
+
+Following blocks contain code to run grid search on choosen model parameters to
+set default values.
+"""
 
 # ╔═╡ 81732f05-ea97-402e-8f4c-365814fd4280
 # begin
-# 	print("TADy")
+# 	"""
+# 	First variant of experiments testing variants of `fade_rate`, `difusion_rate` and 
+# 	`normalization_parameter` on 4000 iterations.
+# 	"""
+
 # 	fade_rates = 0.0001:0.0001:0.001
 # 	difusion_rates = 0:0.1:1
-# 	normalization_parameter = 0:0.0005:0.001
+# 	normalization_parameters = 0:0.0005:0.001
+
+# 	print_experiment_header(
+# 			title_line = "First experiments for variants on 4000 iterations.",
+# 			parameters_line = "fade_rate=$fade_rates difusion_rate=$difusion_rates normalization_parameter=$normalization_parameters",
+# 			table_header = "f-{fade_rate} d-{difusion_rate} n-{normalization_parameter}: num_food",
+# 		)
+	
+# 	for fade in fade_rates
+# 		for difusion in difusion_rates
+# 			for norm in normalization_parameters
+# 				print("f-$fade d-$difusion n-$norm: ")
+# 				println(AntsModel.sim!(
+# 					AntsModel.init_simulation(
+# 							pheromone_fade_rate = fade,
+# 							difusion_rate = difusion,
+# 							normalization_parameter = norm,
+# 						)..., 
+# 						num_iterations = 4000,
+# 						animate=false
+# 					)
+# 				)
+# 			end
+# 		end
+# 	end
+
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 6fef22b7-c441-459a-96d5-143d91674d31
+# begin
+# 	"""
+# 	Second variant of experiments testing variants of `fade_rate` and `difusion_rate` 
+# 	on 8000 iterations.
+# 	"""
+
+# 	fade_rates = 0.0001:0.0001:0.001
+# 	difusion_rates = 0:0.1:1
+
+# 	print_experiment_header(
+# 			title_line = "Second experiments for variants on 8000 iterations.",
+# 			parameters_line = "fade_rate=$fade_rates difusion_rate=$difusion_rates",
+# 			table_header = "f-{fade_rate} d-{difusion_rate}: num_food",
+# 		)
 
 	
 # 	for fade in fade_rates
 # 		for difusion in difusion_rates
-# 			for norm in normalization_parameter
-# 				print("f-$fade d-$difusion n-$norm: ")
-# 				# println()
-# 				println(AntsModel.sim!(
-# 					AntsModel.init_simulation(
-# 							pheromone_fade_rate = fade,
-# 							search_depth = 10,
-# 							pheromone_power = 0.02,
-# 							difusion_rate = difusion,
-# 							normalization_parameter = norm,
-# 						)..., 
-# 						num_iterations = 2000,
-# 						animate=false
-# 					)
+# 			print("f-$fade d-$difusion: ")
+# 			println(AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 						pheromone_fade_rate = fade,
+# 						difusion_rate = difusion,
+# 					)..., 
+# 					num_iterations = 8000,
+# 					animate=false
 # 				)
-# 				break
-# 			end
-# 			break
+# 			)
 # 		end
-# 		break
 # 	end
-# 	# AntsModel.sim!(AntsModel.init_simulation(
-# 	# 			pheromone_fade_rate = 0.0005,
-# 	# 			search_depth = 10,
-# 	# 			pheromone_power = 0.02,
-# 	# 			difusion_rate = 0.7,
-# 	# 			normalization_parameter = 0.001,
-# 	# 		)..., 
-# 	# 		num_iterations = 4000,
-# 	# 	)
+
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 3dfd629a-49f5-4d2a-a56f-1fc67ab9bdba
+md"""
+### Search Depth and Num Ants State Space search
+
+Following part contains parts for state space search on different variants of model 
+map.
+
+Each part always contains at least following 3 blocks of code:
+- animation of choosen model with default parameters
+- state space search of `search_depth` with appropriate map
+- state space search of `num_ants` with appropriate map
+"""
+
+# ╔═╡ 341fae45-5ce5-486e-beb3-6e38592b0ae1
+md"""
+__First variant of `search_depth` and `num_ants` state space__
+"""
+
+# ╔═╡ 2f016ebe-9f08-4948-a995-af037341aab0
+begin
+	SEARCH_DEPTHS_FIRST_VARIANT = 0:1:1#50
+	NUM_ANTS_FIRST_VARIANT = 20:10:20#00
+end
+
+# ╔═╡ bb39e826-5bc0-46b7-8a95-22d84181e2ff
+md"""
+#### Default Map Without Obstacles
+"""
+
+# ╔═╡ be442933-4574-4abc-a692-fc94fda5edf7
+# begin
+# 	"""
+# 	Animated model with default map and parameters.
+# 	"""
+	
+# 	AntsModel.sim!(
+# 			AntsModel.init_simulation(
+# 				# num_ants = 400,
+# 				# search_depth = 10,
+# 			)..., 
+# 			num_iterations = 4000, 
+# 			animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animate = true,
+# 		)
+# end
+
+# ╔═╡ dd517bce-a2b9-4e69-a1f9-55ee2d563c68
+# begin
+# 	"""
+# 	Experiments for `search_depth` on not obstacle map with 8000 iterations.
+# 	"""
+
+	
+# 	search_depths = SEARCH_DEPTHS_FIRST_VARIANT
+
+# 	print_experiment_header(
+# 			title_line = "Experiments for `search_depth` on not obstacle map with 8000 iterations.",
+# 			parameters_line = "seach_depth=$search_depths",
+# 			table_header = "search_depth num_food",
+# 		)
+
+# 	for depth in search_depths
+# 		print("$depth ")
+# 		println(
+# 			AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 					search_depth = depth,
+# 				)..., 
+# 				num_iterations=8000,
+# 				animate=false,
+# 			)
+# 		)
+# 	end
+
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 0e307df2-9a69-4455-902f-aa32fd849179
+# begin
+# 	"""
+# 	Experiment for `num_ants` on not obstacle map with 8000 iterations.
+# 	"""
+	
+# 	num_ants = NUM_ANTS_FIRST_VARIANT
+
+# 	print_experiment_header(title_line = "Experiment for `num_ants` on not obstacle map with 8000 iterations.",
+# 			parameters_line = "num_ants=$num_ants",
+# 			table_header = "num_ants num_food",
+# 		)
+
+# 	for ants in num_ants
+# 		print("$ants ")
+# 		println(
+# 			AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 					search_depth = ants,
+# 				)..., 
+# 				num_iterations = 8000,
+# 				animate = false,
+# 			)
+# 		)
+# 	end
+	
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 049b60e2-13e3-4c0d-bb58-9ef415328abd
+md"""
+#### Obstacles Around Food Sources
+"""
+
+# ╔═╡ 9c100f25-a7c0-4a19-97ef-7df25b23f222
+begin
+	FOOD_FIRST_VARIANT = [(1:15, 1:20), (80:100, 85:95)]
+	NEST_FIRST_VARIANT = [(45:52, 55:62)]
+	OBSTACLE_FIRST_VARIANT = [(1:7, 25:25), (12:18, 25:25), (18:18, 1:25),
+		(75:100, 80:80), (75:75, 80:93)]
+end
+
+# ╔═╡ 4282f28c-a6e9-44d0-a9c4-c0cff7198ae0
+# begin
+# 	"""
+# 	Animated variant with map defined by `FIRST_VARIANT` variables.
+# 	"""
+	
+# 	AntsModel.sim!(
+# 			AntsModel.init_simulation(
+# 				food_coordinates = FOOD_FIRST_VARIANT,
+# 				nest_coordinates = NEST_FIRST_VARIANT,
+# 				obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 				# num_ants = 400,
+# 				# search_depth = 10,
+# 			)..., 
+# 			num_iterations = 4000, 
+# 			animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animate = true,
+# 		)
+# end
+
+# ╔═╡ 23214ebf-a869-44c8-a3d8-b0975d6a6369
+# begin
+# 	"""
+# 	Experiments for `search_depth` on first variant obstacle map with 8000 iterations.
+# 	"""
+
+# 	search_depths = SEARCH_DEPTHS_FIRST_VARIANT
+
+# 	print_experiment_header(
+# 			title_line = "Experiments for `search_depth` on first variant obstacle map with 8000 iterations.",
+# 			parameters_line = "seach_depth=$search_depths",
+# 			table_header = "search_depth num_food",
+# 		)
+
+# 	for depth in search_depths
+# 		print("$depth ")
+# 		println(
+# 			AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 					food_coordinates = FOOD_FIRST_VARIANT,
+# 					nest_coordinates = NEST_FIRST_VARIANT,
+# 					obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 					search_depth = depth,
+# 				)..., 
+# 				num_iterations=8000,
+# 				animate=false,
+# 			)
+# 		)
+# 	end
+
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 360f6d78-c879-4e6f-8bde-e9825b223e23
+# begin
+# 	"""
+# 	Experiment for `num_ants` on first variant obstacle map with 8000 iterations.
+# 	"""
+	
+# 	num_ants=NUM_ANTS_FIRST_VARIANT
+
+# 	print_experiment_header(title_line = "Experiment for `num_ants` on first variant obstacle map with 8000 iterations.",
+# 			parameters_line = "num_ants=$num_ants",
+# 			table_header = "num_ants num_food",
+# 		)
+
+# 	for ants in num_ants
+# 		print("$ants ")
+# 		println(
+# 			AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 					food_coordinates = FOOD_FIRST_VARIANT,
+# 					nest_coordinates = NEST_FIRST_VARIANT,
+# 					obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 					search_depth = ants,
+# 				)..., 
+# 				num_iterations=8000,
+# 				animate=false,
+# 			)
+# 		)
+# 	end
+	
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 7e1df792-4b2d-4816-ae84-a5adc1ce9e09
+md"""
+#### Map With
+"""
+
+# ╔═╡ f4bd62af-e81f-467e-b8ce-ca19d47e2dee
+begin
+	FOOD_SECOND_VARIANT = [(1:15, 1:20), (80:100, 85:95)]
+	NEST_SECOND_VARIANT = [(45:52, 55:62)]
+	OBSTACLE_SECOND_VARIANT = [(1:7, 25:25), (12:18, 25:25), (18:18, 1:25),
+		(75:100, 80:80), (75:75, 80:93)]
+end
+
+# ╔═╡ 4125fd48-1b77-4f32-a5ed-79a59797edba
+# begin
+# 	"""
+# 	Animated variant with map defined by `FIRST_VARIANT` variables.
+# 	"""
+	
+# 	AntsModel.sim!(
+# 			AntsModel.init_simulation(
+# 				food_coordinates = FOOD_FIRST_VARIANT,
+# 				nest_coordinates = NEST_FIRST_VARIANT,
+# 				obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 				# num_ants = 400,
+# 				# search_depth = 10,
+# 			)..., 
+# 			num_iterations = 4000, 
+# 			animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animate = true,
+# 		)
+# end
+
+# ╔═╡ dc897db3-6eb6-4ff2-a66d-b3c22861d66e
+# begin
+# 	"""
+# 	Experiments for `search_depth` on first variant obstacle map with 8000 iterations.
+# 	"""
+
+# 	search_depths = SEARCH_DEPTHS_FIRST_VARIANT
+
+# 	print_experiment_header(
+# 			title_line = "Experiments for `search_depth` on first variant obstacle map with 8000 iterations.",
+# 			parameters_line = "seach_depth=$search_depths",
+# 			table_header = "search_depth num_food",
+# 		)
+
+# 	for depth in search_depths
+# 		print("$depth ")
+# 		println(
+# 			AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 					food_coordinates = FOOD_FIRST_VARIANT,
+# 					nest_coordinates = NEST_FIRST_VARIANT,
+# 					obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 					search_depth = depth,
+# 				)..., 
+# 				num_iterations=8000,
+# 				animate=false,
+# 			)
+# 		)
+# 	end
+
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 2de5bcf4-9865-4804-845a-eae55d389089
+# begin
+# 	"""
+# 	Experiment for `num_ants` on first variant obstacle map with 8000 iterations.
+# 	"""
+	
+# 	num_ants=NUM_ANTS_FIRST_VARIANT
+
+# 	print_experiment_header(title_line = "Experiment for `num_ants` on first variant obstacle map with 8000 iterations.",
+# 			parameters_line = "num_ants=$num_ants",
+# 			table_header = "num_ants num_food",
+# 		)
+
+# 	for ants in num_ants
+# 		print("$ants ")
+# 		println(
+# 			AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 					food_coordinates = FOOD_FIRST_VARIANT,
+# 					nest_coordinates = NEST_FIRST_VARIANT,
+# 					obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 					search_depth = ants,
+# 				)..., 
+# 				num_iterations=8000,
+# 				animate=false,
+# 			)
+# 		)
+# 	end
+	
+# 	print_experiment_bottom()
 # end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1008,9 +1380,31 @@ version = "1.4.1+0"
 # ╔═╡ Cell order:
 # ╠═204e71fb-a0c8-4c1d-a8e9-88146b80d936
 # ╠═78142762-ae33-11ed-3e6b-75b2fc3af2b5
+# ╠═b94e4c8c-5335-4e99-b92a-28d5a5b00b1b
+# ╠═1f1d6b11-6d87-4ff2-81c7-0f2ba2ceffec
 # ╠═911cc6b0-474d-4856-94ca-f9fd6732ed34
 # ╠═ee4e8271-3aa3-43a3-9d80-7597963fce5b
 # ╠═749b49c9-303a-4202-8084-5088ace51dea
+# ╟─3a0450e1-7009-4494-a8f2-514409a36727
+# ╟─2aa49e8a-0323-491d-a802-64ecbed69a70
 # ╠═81732f05-ea97-402e-8f4c-365814fd4280
+# ╠═6fef22b7-c441-459a-96d5-143d91674d31
+# ╟─3dfd629a-49f5-4d2a-a56f-1fc67ab9bdba
+# ╟─341fae45-5ce5-486e-beb3-6e38592b0ae1
+# ╠═2f016ebe-9f08-4948-a995-af037341aab0
+# ╟─bb39e826-5bc0-46b7-8a95-22d84181e2ff
+# ╠═be442933-4574-4abc-a692-fc94fda5edf7
+# ╠═dd517bce-a2b9-4e69-a1f9-55ee2d563c68
+# ╠═0e307df2-9a69-4455-902f-aa32fd849179
+# ╟─049b60e2-13e3-4c0d-bb58-9ef415328abd
+# ╠═9c100f25-a7c0-4a19-97ef-7df25b23f222
+# ╠═4282f28c-a6e9-44d0-a9c4-c0cff7198ae0
+# ╠═23214ebf-a869-44c8-a3d8-b0975d6a6369
+# ╠═360f6d78-c879-4e6f-8bde-e9825b223e23
+# ╠═7e1df792-4b2d-4816-ae84-a5adc1ce9e09
+# ╠═f4bd62af-e81f-467e-b8ce-ca19d47e2dee
+# ╠═4125fd48-1b77-4f32-a5ed-79a59797edba
+# ╠═dc897db3-6eb6-4ff2-a66d-b3c22861d66e
+# ╠═2de5bcf4-9865-4804-845a-eae55d389089
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

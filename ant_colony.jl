@@ -791,11 +791,11 @@ Initialize the simulation.
 - `nest_coordinates=[(45:52, 55:62)]`
 - `obstacle_coordinates=[]`
 - `num_ants=400`
-- `pheromone_fade_rate=0.0005`
-- `search_depth=20`
+- `pheromone_fade_rate=0.00021`
+- `search_depth=10`
 - `pheromone_power=0.02`
-- `difusion_rate=0.3`
-- `normalization_parameter=0.0001`
+- `difusion_rate=0.495`
+- `normalization_parameter=0.0005`
 
 
 See also [`Map`](), [`Ants`](), [`ModelParameters`](), [`create_map`]() 
@@ -807,11 +807,11 @@ function init_simulation(;
 		nest_coordinates = [(45:52, 55:62)],
 		obstacle_coordinates = [],
 		num_ants = 400,
-		pheromone_fade_rate = 0.0005,
-		search_depth = 20,
+		pheromone_fade_rate = 0.00021,
+		search_depth = 10,
 		pheromone_power = 0.02,
-		difusion_rate = 0.3,
-		normalization_parameter = 0.0001
+		difusion_rate = 0.495,
+		normalization_parameter = 0.0005,
 	)
 
 	simulation_map = 
@@ -827,7 +827,7 @@ function init_simulation(;
 			difusion_rate, 
 			normalization_parameter)
 	
-	food_counter = 0
+	# food_counter = 0
 
 	ants = init_ants(simulation_map.nest_coordinates, num_ants)
 
