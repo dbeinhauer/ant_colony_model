@@ -218,7 +218,8 @@ md"""
 # 				# search_depth = 10,
 # 			)..., 
 # 			num_iterations = 4000, 
-# 			animation_type = AntsModel.PHEROMONE_ANIM,
+# 			# animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
 # 			animate = true,
 # 		)
 # end
@@ -290,28 +291,29 @@ md"""
 
 # ╔═╡ 9c100f25-a7c0-4a19-97ef-7df25b23f222
 begin
-	FOOD_FIRST_VARIANT = [(1:15, 1:20), (80:100, 85:95)]
-	NEST_FIRST_VARIANT = [(45:52, 55:62)]
-	OBSTACLE_FIRST_VARIANT = [(1:7, 25:25), (12:18, 25:25), (18:18, 1:25),
+	FOOD_VARIANT_1 = [(1:15, 1:20), (80:100, 85:95)]
+	NEST_VARIANT_1 = [(45:52, 55:62)]
+	OBSTACLE_VARIANT_1 = [(1:7, 25:25), (12:18, 25:25), (18:18, 1:25),
 		(75:100, 80:80), (75:75, 80:93)]
 end
 
 # ╔═╡ 4282f28c-a6e9-44d0-a9c4-c0cff7198ae0
 # begin
 # 	"""
-# 	Animated variant with map defined by `FIRST_VARIANT` variables.
+# 	Animated variant with map defined by `VARIANT_1` variables.
 # 	"""
 	
 # 	AntsModel.sim!(
 # 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_FIRST_VARIANT,
-# 				nest_coordinates = NEST_FIRST_VARIANT,
-# 				obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 				food_coordinates = FOOD_VARIANT_1,
+# 				nest_coordinates = NEST_VARIANT_1,
+# 				obstacle_coordinates = OBSTACLE_VARIANT_1,
 # 				# num_ants = 400,
 # 				# search_depth = 10,
 # 			)..., 
 # 			num_iterations = 4000, 
-# 			animation_type = AntsModel.PHEROMONE_ANIM,
+# 			# animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
 # 			animate = true,
 # 		)
 # end
@@ -319,13 +321,13 @@ end
 # ╔═╡ 23214ebf-a869-44c8-a3d8-b0975d6a6369
 # begin
 # 	"""
-# 	Experiments for `search_depth` on first variant obstacle map with 8000 iterations.
+# 	Experiments for `search_depth` on `VARIANT_1` obstacle map with 8000 iterations.
 # 	"""
 
 # 	search_depths = SEARCH_DEPTHS_FIRST_VARIANT
 
 # 	print_experiment_header(
-# 			title_line = "Experiments for `search_depth` on first variant obstacle map with 8000 iterations.",
+# 			title_line = "Experiments for `search_depth` on `VARIANT_1` obstacle map with 8000 iterations.",
 # 			parameters_line = "seach_depth=$search_depths",
 # 			table_header = "search_depth num_food",
 # 		)
@@ -335,9 +337,9 @@ end
 # 		println(
 # 			AntsModel.sim!(
 # 				AntsModel.init_simulation(
-# 					food_coordinates = FOOD_FIRST_VARIANT,
-# 					nest_coordinates = NEST_FIRST_VARIANT,
-# 					obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 					food_coordinates = FOOD_VARIANT_1,
+# 					nest_coordinates = NEST_VARIANT_1,
+# 					obstacle_coordinates = OBSTACLE_VARIANT_1,
 # 					search_depth = depth,
 # 				)..., 
 # 				num_iterations=8000,
@@ -352,12 +354,12 @@ end
 # ╔═╡ 360f6d78-c879-4e6f-8bde-e9825b223e23
 # begin
 # 	"""
-# 	Experiment for `num_ants` on first variant obstacle map with 8000 iterations.
+# 	Experiment for `num_ants` on `VARIANT_1` obstacle map with 8000 iterations.
 # 	"""
 	
 # 	num_ants=NUM_ANTS_FIRST_VARIANT
 
-# 	print_experiment_header(title_line = "Experiment for `num_ants` on first variant obstacle map with 8000 iterations.",
+# 	print_experiment_header(title_line = "Experiment for `num_ants` on `VARIANT_1` obstacle map with 8000 iterations.",
 # 			parameters_line = "num_ants=$num_ants",
 # 			table_header = "num_ants num_food",
 # 		)
@@ -367,9 +369,9 @@ end
 # 		println(
 # 			AntsModel.sim!(
 # 				AntsModel.init_simulation(
-# 					food_coordinates = FOOD_FIRST_VARIANT,
-# 					nest_coordinates = NEST_FIRST_VARIANT,
-# 					obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 					food_coordinates = FOOD_VARIANT_1,
+# 					nest_coordinates = NEST_VARIANT_1,
+# 					obstacle_coordinates = OBSTACLE_VARIANT_1,
 # 					search_depth = ants,
 # 				)..., 
 # 				num_iterations=8000,
@@ -383,33 +385,46 @@ end
 
 # ╔═╡ 7e1df792-4b2d-4816-ae84-a5adc1ce9e09
 md"""
-#### Map With
+#### Easy Maze Split Further
 """
 
 # ╔═╡ f4bd62af-e81f-467e-b8ce-ca19d47e2dee
 begin
-	FOOD_SECOND_VARIANT = [(1:15, 1:20), (80:100, 85:95)]
-	NEST_SECOND_VARIANT = [(45:52, 55:62)]
-	OBSTACLE_SECOND_VARIANT = [(1:7, 25:25), (12:18, 25:25), (18:18, 1:25),
-		(75:100, 80:80), (75:75, 80:93)]
+	GRID_SIZE_VARIANT_2 = (100, 100)#(50, 50)
+	FOOD_VARIANT_2 = [(80:90, 1:20), (80:90, 80:100)]
+	NEST_VARIANT_2 = [(3:10, 45:55)]
+	OBSTACLE_VARIANT_2 = [
+			(1:60, 35:35), (60:60, 1:35),
+			(1:60, 65:65), (60:60, 65:100),
+			(75:75, 25:75),
+			(75:100, 25:25), (75:100, 75:75)
+
+		]
 end
 
 # ╔═╡ 4125fd48-1b77-4f32-a5ed-79a59797edba
 # begin
 # 	"""
-# 	Animated variant with map defined by `FIRST_VARIANT` variables.
+# 	Animated variant with map defined by `VARIANT_2` variables.
 # 	"""
 	
 # 	AntsModel.sim!(
 # 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_FIRST_VARIANT,
-# 				nest_coordinates = NEST_FIRST_VARIANT,
-# 				obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 				grid_size = GRID_SIZE_VARIANT_2,
+# 				food_coordinates = FOOD_VARIANT_2,
+# 				nest_coordinates = NEST_VARIANT_2,
+# 				obstacle_coordinates = OBSTACLE_VARIANT_2,
 # 				# num_ants = 400,
 # 				# search_depth = 10,
+# 				pheromone_fade_rate = 0.00021,
+# 				search_depth = 10,
+# 				pheromone_power = 0.02,
+# 				difusion_rate = 0.495,
+# 				normalization_parameter = 0.0005,
 # 			)..., 
 # 			num_iterations = 4000, 
-# 			animation_type = AntsModel.PHEROMONE_ANIM,
+# 			# animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
 # 			animate = true,
 # 		)
 # end
@@ -417,13 +432,13 @@ end
 # ╔═╡ dc897db3-6eb6-4ff2-a66d-b3c22861d66e
 # begin
 # 	"""
-# 	Experiments for `search_depth` on first variant obstacle map with 8000 iterations.
+# 	Experiments for `search_depth` on `VARIANT_2` obstacle map with 8000 iterations.
 # 	"""
 
 # 	search_depths = SEARCH_DEPTHS_FIRST_VARIANT
 
 # 	print_experiment_header(
-# 			title_line = "Experiments for `search_depth` on first variant obstacle map with 8000 iterations.",
+# 			title_line = "Experiments for `search_depth` on `VARIANT_2`  obstacle map with 8000 iterations.",
 # 			parameters_line = "seach_depth=$search_depths",
 # 			table_header = "search_depth num_food",
 # 		)
@@ -433,9 +448,9 @@ end
 # 		println(
 # 			AntsModel.sim!(
 # 				AntsModel.init_simulation(
-# 					food_coordinates = FOOD_FIRST_VARIANT,
-# 					nest_coordinates = NEST_FIRST_VARIANT,
-# 					obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 					food_coordinates = FOOD_VARIANT_2,
+# 					nest_coordinates = NEST_VARIANT_2,
+# 					obstacle_coordinates = OBSTACLE_VARIANT_2,
 # 					search_depth = depth,
 # 				)..., 
 # 				num_iterations=8000,
@@ -450,12 +465,12 @@ end
 # ╔═╡ 2de5bcf4-9865-4804-845a-eae55d389089
 # begin
 # 	"""
-# 	Experiment for `num_ants` on first variant obstacle map with 8000 iterations.
+# 	Experiment for `num_ants` on `VARIANT_2` obstacle map with 8000 iterations.
 # 	"""
 	
 # 	num_ants=NUM_ANTS_FIRST_VARIANT
 
-# 	print_experiment_header(title_line = "Experiment for `num_ants` on first variant obstacle map with 8000 iterations.",
+# 	print_experiment_header(title_line = "Experiment for `num_ants` on `VARIANT_2` obstacle map with 8000 iterations.",
 # 			parameters_line = "num_ants=$num_ants",
 # 			table_header = "num_ants num_food",
 # 		)
@@ -465,9 +480,120 @@ end
 # 		println(
 # 			AntsModel.sim!(
 # 				AntsModel.init_simulation(
-# 					food_coordinates = FOOD_FIRST_VARIANT,
-# 					nest_coordinates = NEST_FIRST_VARIANT,
-# 					obstacle_coordinates = OBSTACLE_FIRST_VARIANT,
+# 					food_coordinates = FOOD_VARIANT_2,
+# 					nest_coordinates = NEST_VARIANT_2,
+# 					obstacle_coordinates = OBSTACLE_VARIANT_2,
+# 					search_depth = ants,
+# 				)..., 
+# 				num_iterations=8000,
+# 				animate=false,
+# 			)
+# 		)
+# 	end
+	
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 03a047d1-d48b-4558-b433-3f7cc8031e5a
+md"""
+#### Easy Maze Split Closer
+"""
+
+# ╔═╡ d4866da1-2128-4968-a72b-022cdd879516
+begin
+	GRID_SIZE_VARIANT_3 = (100, 100)#(50, 50)
+	FOOD_VARIANT_3 = [(80:90, 1:20), (80:90, 80:100)]
+	NEST_VARIANT_3 = [(3:10, 45:55)]
+	OBSTACLE_VARIANT_3 = [
+			(1:40, 35:35), (40:40, 1:35),
+			(1:40, 65:65), (40:40, 65:100),
+			(55:55, 25:75),
+			(55:100, 25:25), (55:100, 75:75)
+
+		]
+end
+
+# ╔═╡ eb092e0b-ee95-47df-904d-4ee34ce05943
+begin
+	"""
+	Animated variant with map defined by `VARIANT_3` variables.
+	"""
+	
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				grid_size = GRID_SIZE_VARIANT_3,
+				food_coordinates = FOOD_VARIANT_3,
+				nest_coordinates = NEST_VARIANT_3,
+				obstacle_coordinates = OBSTACLE_VARIANT_3,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 50,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
+
+# ╔═╡ 3bdd911c-cd98-4a7d-aabd-8e7a8d4c9105
+# begin
+# 	"""
+# 	Experiments for `search_depth` on `VARIANT_3` obstacle map with 8000 iterations.
+# 	"""
+
+# 	search_depths = SEARCH_DEPTHS_FIRST_VARIANT
+
+# 	print_experiment_header(
+# 			title_line = "Experiments for `search_depth` on `VARIANT_3`  obstacle map with 8000 iterations.",
+# 			parameters_line = "seach_depth=$search_depths",
+# 			table_header = "search_depth num_food",
+# 		)
+
+# 	for depth in search_depths
+# 		print("$depth ")
+# 		println(
+# 			AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 					food_coordinates = FOOD_VARIANT_3,
+# 					nest_coordinates = NEST_VARIANT_3,
+# 					obstacle_coordinates = OBSTACLE_VARIANT_2,
+# 					search_depth = depth,
+# 				)..., 
+# 				num_iterations=8000,
+# 				animate=false,
+# 			)
+# 		)
+# 	end
+
+# 	print_experiment_bottom()
+# end
+
+# ╔═╡ 88b4a5f6-3949-4f7a-93c1-c9aba828f500
+# begin
+# 	"""
+# 	Experiment for `num_ants` on `VARIANT_3` obstacle map with 8000 iterations.
+# 	"""
+	
+# 	num_ants=NUM_ANTS_FIRST_VARIANT
+
+# 	print_experiment_header(title_line = "Experiment for `num_ants` on `VARIANT_3` obstacle map with 8000 iterations.",
+# 			parameters_line = "num_ants=$num_ants",
+# 			table_header = "num_ants num_food",
+# 		)
+
+# 	for ants in num_ants
+# 		print("$ants ")
+# 		println(
+# 			AntsModel.sim!(
+# 				AntsModel.init_simulation(
+# 					food_coordinates = FOOD_VARIANT_3,
+# 					nest_coordinates = NEST_VARIANT_3,
+# 					obstacle_coordinates = OBSTACLE_VARIANT_3,
 # 					search_depth = ants,
 # 				)..., 
 # 				num_iterations=8000,
@@ -1406,5 +1532,10 @@ version = "1.4.1+0"
 # ╠═4125fd48-1b77-4f32-a5ed-79a59797edba
 # ╠═dc897db3-6eb6-4ff2-a66d-b3c22861d66e
 # ╠═2de5bcf4-9865-4804-845a-eae55d389089
+# ╠═03a047d1-d48b-4558-b433-3f7cc8031e5a
+# ╠═d4866da1-2128-4968-a72b-022cdd879516
+# ╠═eb092e0b-ee95-47df-904d-4ee34ce05943
+# ╠═3bdd911c-cd98-4a7d-aabd-8e7a8d4c9105
+# ╠═88b4a5f6-3949-4f7a-93c1-c9aba828f500
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
