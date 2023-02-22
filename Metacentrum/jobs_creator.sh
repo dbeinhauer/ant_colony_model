@@ -20,7 +20,7 @@ DATADIR=/storage/praha1/home/dbeinhauer
 
 echo 'EXPERIMENT_NAME='$EXP_NAME >>"$JOBS_DIR/$EXP_NAME.sh"
 
-echo 'echo "$PBS_JOBID is running on node `hostname -f` in a scratch directory $SCRATCHDIR" >> $DATADIR/$EXPERIMENT_NAME.txt
+echo 'echo "$PBS_JOBID is running on node `hostname -f` in a scratch directory $SCRATCHDIR" >> jobs_info.txt
 
 
 module load julia
