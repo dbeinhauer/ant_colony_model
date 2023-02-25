@@ -1,0 +1,22 @@
+\begin{thebibliography}{1}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\expandafter\ifx\csname bibnamefont\endcsname\relax
+  \def\bibnamefont#1{#1}\fi
+\expandafter\ifx\csname bibfnamefont\endcsname\relax
+  \def\bibfnamefont#1{#1}\fi
+\expandafter\ifx\csname citenamefont\endcsname\relax
+  \def\citenamefont#1{#1}\fi
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{}\fi
+\providecommand{\bibinfo}[2]{#2}
+\providecommand{\eprint}[1]{\href{http://arxiv.org/abs/#1}{arXiv:#1}}
+
+\bibitem[{\citenamefont{Jones}(2010)}]{jones2010characteristics}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jones}},
+  \bibinfo{title}{Characteristics of pattern formation and evolution in
+  approximations of physarum transport networks},
+  \emph{\bibinfo{journal}{Artificial life}} \textbf{\bibinfo{volume}{16}},
+  \bibinfo{pages}{127} (\bibinfo{year}{2010}).
+
+\end{thebibliography}

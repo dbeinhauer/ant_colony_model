@@ -1,0 +1,219 @@
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+\input{pisika.dat}
+
+%  Editorial staff will uncomment the next line
+% \input{staff.hed}
+
+
+\begin{document}
+
+%--------------------------------------------------------------------------
+%  fill in the paper's title, author(s), and corresponding institutions
+%--------------------------------------------------------------------------
+\providecommand{\ShortAuthorList}[0]{A.~M.~Surname, B.~D.~Suffix Jr., C.~G. Suffix III} % use "A.~M.~Surname \textit{et al}." for more than three authors.
+\title{Modelování hledání potravy v mravenčí kolonii}
+\author[1]{Autor David Beinhauer}
+\affil[1]{Department of Physics, DD University}
+\affil[2]{Department of Science, XX University}
+
+\date{\dateline{}}
+
+\begin{abstract}
+\noindent
+%---------------------------------------------------------------------------
+%               Include abstract and keywords here
+%---------------------------------------------------------------------------
+Chování hmyzích druhů žijících v kooperujících koloniích je dodnes 
+výzvou pro vědu. Pochopení této problematiky může vést k zdokonalení řešení
+řady zdánlivě nesouvisejících problémů. V práci je představen jednoduchý
+multiagentní model mravenčí kolonie zaměřující se na problematiku shánění
+potravy v různě komplexních prostředích. Návrh modelu je inspirován prací 
+\citet{jones2010characteristics}. 
+Při analýze (TODO: dopsat vysledky analyzy)
+
+\keywords{keyword 1, keyword 2}
+
+\DOI{} % do not delete this line
+\end{abstract}
+
+\maketitle
+\thispagestyle{titlestyle}
+
+
+
+%---------------------------------------------------------------------------
+%               the main text of your paper begins here
+%---------------------------------------------------------------------------
+\section*{Úvod}
+
+Kolektivní chování řady druhů hmyzu, mezi než patří například mravenci,
+je charakteristické komplexností a vysokou koordinovaností jedinců. Kolonie
+mravenců například společně zajišťuje potravu pro celou populaci, buduje hnízdo,
+strará se o potomky, či se brání před predátory. Pochopení tohoto chování by
+mohlo pomoci zdokonalit řešení řady zdánlivě vzdálených problému, mezi něž
+patří například problém obchodního cestujícího (TODO: reference) a řada dalších. 
+jedinců, komplexnosti přirozeného prostředí a nepřesnosti měřících zařízeních 
+je však exaktní studium chování a organizace těchto kolonií velmi komplikované a 
+často značně nepřesné. V důsledku nárustu výpočetního výkonu se v současnosti 
+pro studium takto komplexních dějů stále častěji využívají matematické modely. 
+
+V této práci navrhujeme a analyzujeme jednoduchý multiagentní model mravenčí 
+kolonie zaměřený na problematiku shánění potravy. Model je založen na komunikaci
+mravenců pomocí vypouštění a detekce rozdílné hladiny feromonů v prostředí.
+Z velké části je insporován prací \citet{jones2010characteristics}, jenž studuje
+formování transportních drah plísně \emph{Physarum polycephalum}. V analytické části
+porovnáváme chování mravenců a jejich úspěšnost při sběru potravy v různě 
+strukturovaných prostředích. Dále zkoumáme závislosti počtu jedinců a jejich 
+schopnosti dopředu detekovat cílovou destinaci na celkovém množství potravy 
+dopravené do hnízda v průběhu simulace. 
+
+
+\section*{Matematický model}
+Při návrhu modelu jsme se zaměřili především na jednoduchou architekturu s
+malým množstvím snadno pochopitelných parametrů pro jednodušší analýzu 
+fungování modelu, který vhodně popíše chování mravenců při hledání potravy.
+Ideálně by měl model zachytit kolektivní chování mravenců při hledání potravy.
+Mravenci by měli být schopni jednoduchou lokální signalizací pomocí
+vypouštění feromonu co nejvíce optimalizovat trasu pro zásobování hnízda
+potravou. V modelu je dále možné zkoumat různé varianty map s různě 
+rozmístěnými překážkami, hnízdy i 
+\section*{Výsledky}
+
+TODO: popsat vysledky vyberu parametru
+
+TODO: porovnat jednotlive mapy
+
+TODO: popsat zavislost poctu mravencu a hloubky prohledavani na poctu potravy
+
+
+
+\section*{Metody}
+
+\subsection*{Návrh modelu}
+Model staví na návrhu z práce \citet{jones2010characteristics}
+modelující formování transportních drah plísně \emph{Physarum polycephalum}
+pomocí chemotaxe. Tento model jsme zvolili, jelikož je založen na podobných 
+principech jako námi zkoumaný problém.
+
+Použili jsme multiagentní model v diskrétním prostředí. Prostředí reprezentujeme 
+pravidelnou 2D mřížkou, v níž každá buňka odpovídá pozici v simulovaném prostředí a je 
+popsána množinou odpovídajících proměnných popsaných v tabulce (\ref{table:mapa}).
+V prostředí jsou vždy omezené zásobárny potravy, kde každá buňka s potravou
+odpovídá množství zásob, které je schopen přepravit jeden mravenec. Pokud
+tedy mraven sebere potravu z dané buňky, pak se veškeré zásoby potravy v 
+buňce vyčerpají a stane se tak prázdnou. Naopak předpokládáme, že všechny
+buňky náležící hnízdu mají neomezenou kapacitu a je v nich možné 
+nashromáždit neomezené množství potravy.
+
+
+\begin{table}[t]
+  \centering % center-align tables within a column
+  \begin{tabular}{l p{5cm}}
+  \toprule
+  Proměnná & Popis \\
+  \midrule
+    \texttt{map\_object} & Objekt v buňce (možnosti:
+    žádný, překážka, potrava, mraveniště). \\
+    \texttt{food\_pheromone} & Hladina feromonu pro sběr potravy.\\
+    \texttt{nest\_pheromone} & Hladina feromonu pro návrat do mraveniště.\\	
+  \bottomrule
+  \end{tabular}
+  \caption{Seznam promměnných jedné buňky mapy simulace.} \label{table:mapa} 
+\end{table}
+
+
+Agenti reprezentují jednotlivé mravence a jsou náhodně 
+vygenerování v mraveništích začátku simulace. Jejich počet je dán 
+parametrem \texttt{num\_ants} a 
+v průběhu simulace je již neměnný. Jsou charakterizováni pozicí na mapě,
+orientací a příznakem, zda hledají potravu, nebo se s ní vracejí do mraveniště.
+Každý agent v každém kroku simulace provede následující posloupnost akcí:
+
+\begin{enumerate}
+  \item Podle svého stavu zkontroluje, zda se nachází u zdroje potravy 
+  (resp. v mraveništi). Pokud ano, pak sebere jednotku potravy 
+  (resp. vyloží ji v mraveništi) a náležitě změní stav.
+  \item Přesune se na novou pozici.
+  \item Vypustí jednotku odpovídajícího feromonu na nové pozici.
+\end{enumerate}
+
+Mravenec má v každém kroku simulace pouze 3 možné varianty posunu, které 
+jsou posun o 1 pozici vpřed, doleva nebo doprava. Z výběru jsou následně vyřazeny
+pozice s překážkami a vyskytující se mimo mapu. Jestliže není ani jeden ze zmíněných 
+pohybů možný, pak agent uniformě náhodně změní svou orientaci doleva, nebo
+doprava. V opačném případě je nová pozice náhodně zvolena z vážené distribuce, 
+v níž je váha možné nové pozice $p$ agenta $a$ rovna:
+
+\begin{equation}
+  weight(p, a) = pheromone(p, a) + c
+\end{equation}
+
+Kde $pheromone$ je funkce, jejíž hodnota je rovna hladině odpovídajícího 
+feromonu na pozici $p$. Pokud mravenec hledá potravu, pak sleduje hladiny \texttt{food}
+feromonu, v opačném případě \texttt{nest} feromonu.
+Parametr $c$ slouží jako faktor pro snížení vlivu hladiny feromonu na volbě
+nové pozice. Navíc pokud je mravenec dostatečně blízko cílovému objektu
+v alespoň jednom z možných směrů (přímo, vlevo nebo v vpravo) a cesta
+není blokována překážkou, pak se vždy posune směrem k tomuto objektu (viz.
+parametr $d$ v tabulce (\ref{table:parametry})). 
+
+Pro komunikaci mravenců používáme dvě varianty feromonů. Jeden pro označení 
+cesty ke zdroji potravy, druhý pro signalizaci cesty do mraveniště. 
+Každý mravenec v každé iteraci simulace vypustí aktuální pozici, buď feromon typu
+\texttt{food}, pokud hledá potravu, nebo \texttt{nest}, pokud se s potravou
+vrací do hnízda. Aby nedocházelo k hromadění feromonu, je koncentrace feromonu
+na dané pozici shora omezena a v případě překročení hranice již nelze hladinu
+feromonu dále zvyšovat. Vyprchávání feromonu v čase je realizováno následující 
+diferenční rovnicí:
+
+\begin{equation}
+  level_{p}(t+1) = 
+  \left\{
+    \begin{array}{ll}
+      level_{p}(t) - f  & level_{p}(t) > f \\
+      0 & level_{p}(t) \leq f \\ 
+    \end{array}
+  \right.
+\end{equation}
+
+Kde $level_{p}(t)$ značí hladinu feromonu na pozici $p$ v čase $t$ a $f$
+udává rychlost vyprchávání feromonu.
+
+Dále je v každém kroku simulace část feromonu na libovolné pozici $p$ 
+rovnoměrně difundována do Moorova okolí $p$ z nějž jsou vyřazeny neplatné pozice
+(mimo mapu nebo překážky), množství difundovaného feromonu je dáno 
+příslušným parametrem.
+
+Tabulce (\ref{table:parametry}) obsahuje podrobnější popis parametrů modelu.
+
+
+\begin{table}[t]
+  \centering % center-align tables within a column
+  \begin{tabular}{l p{5cm}}
+  \toprule
+  Parametr & Popis \\
+  \midrule
+    $n \in \mathbb{N}$ & Počet mravenců v simulaci. \\ 
+    $f \in (0, 1)$ & Rychlost vyprchávání feromonu. \\
+    $d \in \mathbb{N}_0$ & Maximální vzdálenost pro detekování cílového objektu.\\
+    $p \in (0, 1)$ & Množství feromonu vypuštěného 1 mravencem (část maximální hladiny).\\
+    $r \in (0, 1)$ & Část feromonu, jenž se při difuzi rozprostře do sousedství. \\
+    $c \in \mathbb{R}_0^{+}$ & Parametr snížení vlivu feromonu.\\ 
+  \bottomrule
+  \end{tabular}
+  \caption{Seznam parametrů modelu.} \label{table:parametry} 
+\end{table}
+
+\subsection*{Analýza modelu}
+
+TODO: popis nastavení modelu a vlastností modelu
+
+
+% Please use pisikabst.bst. You may your own *.bib file.
+\bibliographystyle{pisikabst}
+\bibliography{bibfile}
+
+
+
+\end{document}

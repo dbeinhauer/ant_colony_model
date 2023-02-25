@@ -63,18 +63,18 @@ __Parameters of the model__
 "All model parameters."
 struct ModelParameters
 	"How much pheromone level diminishes after one iteration (from interval (0, 1))."
-	pheromone_fade_rate::Float64
+	pheromone_fade_rate::Float64 # `f` from the model description
 	"Maximal distance of the tile to check for searched object (food, nest)."
-	search_depth::Integer
+	search_depth::Integer # `d` from the model description
 	"Amount of the pheromone placed by singe ant (from interval (0, 1))."
-	ant_pheromone_power::Float64
+	ant_pheromone_power::Float64 # `p` from the model description
 	"""
 	Fraction of pheromone which stays on original position after one iteration, 
   	the rest will spread around the neigborhood (from interval (0, 1)).
 	"""
-	pheromone_difusion_rate::Float64
+	pheromone_difusion_rate::Float64 # `r` from the model description
 	"Diminishes importance of pheromone level while choosing next step."
-	normalization_parameter::Float64
+	normalization_parameter::Float64 # `c` from the model description 
 end
 
 # ╔═╡ ce28bd06-898a-45b5-a1e8-30e188be8888
