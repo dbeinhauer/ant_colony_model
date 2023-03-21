@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.13
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -14,20 +14,45 @@ include("ant_colony.jl")
 
 end
 
+# ╔═╡ 9cb64897-e862-444b-8435-54a90fc8690c
+"""
+	compute_num_food(food_coordinates)
+
+Compute amount of food on the grid.
+"""
+function compute_num_food(
+		food_coordinates,
+	)
+
+	# println("Food Coordinates: $food_coordinates")
+	total_food = 0
+	for (x_coord, y_coord) in food_coordinates
+		# println("x coords: $x_coord    y coords: $y_coord")
+		total_food += 
+			(x_coord[end] - (x_coord[1] - 1))*(y_coord[end] - (y_coord[1] - 1)) 
+		# println(total_food)
+	end
+	
+	return total_food
+end
+
 # ╔═╡ b94e4c8c-5335-4e99-b92a-28d5a5b00b1b
 """
-	print_experiment_header(title_line = "", parameters_line = "", table_header = "")
+	print_experiment_header(food_coordinates, title_line = "", parameters_line = "", table_header = "")
 
 Prints header of the experiment in appropriate format based on the arguments.
 """
-function print_experiment_header(;
+function print_experiment_header(
+		food_coordinates;
 		title_line::String = "",
 		parameters_line::String = "",
 		table_header::String = "",	
 	)
 	println(title_line)
 	println(parameters_line)
-	println("---------------------------------------------------")	
+	println("Total amount of food on the map: $(compute_num_food(food_coordinates))")
+	println("---------------------------------------------------")
+	println()
 	println(table_header)
 	println("---------------------------------------------------")
 end
@@ -61,6 +86,9 @@ begin
 	DEFAULT_NUM_ANTS = 400
 end
 
+# ╔═╡ d661c668-fa91-4964-8817-22cdba31c38b
+compute_num_food(DEFAULT_FOOD_COORDINATES)
+
 # ╔═╡ 59fae562-b2a9-4926-89d2-10f94b936fb8
 function run_experiments(
 		data_interval,
@@ -79,6 +107,7 @@ function run_experiments(
  	# search_depths = SEARCH_DEPTHS_FIRST_VARIANT
 
  	print_experiment_header(
+			food_coordinates,
  			title_line = "Experiments for `$variant` on `$maze_variant` map with $num_iterations iterations.",
 			parameters_line = "$variant=$data_interval",
 			table_header = "$variant num_food",
@@ -227,22 +256,22 @@ md"""
 """
 
 # ╔═╡ be442933-4574-4abc-a692-fc94fda5edf7
-# begin
-# 	"""
-# 	Animated model with default map and parameters.
-# 	"""
+begin
+	"""
+	Animated model with default map and parameters.
+	"""
 	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				# num_ants = 400,
+				# search_depth = 10,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
 
 # ╔═╡ 22565199-80fe-4862-ab38-f397f63c706f
 # begin
@@ -275,31 +304,8 @@ begin
 		(75:100, 80:80), (75:75, 80:93)]
 end
 
-# ╔═╡ 359185c3-32cf-4418-b791-dd122d0be554
-# begin
-# 	"""
-# 	Animated variant with map defined by `VARIANT_1` variables.
-# 	"""
-	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_VARIANT_1,
-# 				nest_coordinates = NEST_VARIANT_2,
-# 				obstacle_coordinates = OBSTACLE_VARIANT_1,
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 				pheromone_fade_rate = 0.00021,
-# 				search_depth = 10,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.495,
-# 				normalization_parameter = 0.0005,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
+# ╔═╡ c8a77bc4-58f4-42c6-872e-37019c6f1a79
+
 
 # ╔═╡ 3745f7aa-ae46-4307-bfa8-47bf518dde8f
 # begin
@@ -345,32 +351,60 @@ begin
 		]
 end
 
-# ╔═╡ 4125fd48-1b77-4f32-a5ed-79a59797edba
-# begin
-# 	"""
-# 	Animated variant with map defined by `VARIANT_2` variables.
-# 	"""
+# ╔═╡ 359185c3-32cf-4418-b791-dd122d0be554
+begin
+	"""
+	Animated variant with map defined by `VARIANT_1` variables.
+	"""
 	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				grid_size = GRID_SIZE_VARIANT_2,
-# 				food_coordinates = FOOD_VARIANT_2,
-# 				nest_coordinates = NEST_VARIANT_2,
-# 				obstacle_coordinates = OBSTACLE_VARIANT_2,
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 				pheromone_fade_rate = 0.00021,
-# 				search_depth = 10,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.495,
-# 				normalization_parameter = 0.0005,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_1,
+				nest_coordinates = NEST_VARIANT_2,
+				obstacle_coordinates = OBSTACLE_VARIANT_1,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 10,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
+
+# ╔═╡ 4125fd48-1b77-4f32-a5ed-79a59797edba
+begin
+	"""
+	Animated variant with map defined by `VARIANT_2` variables.
+	"""
+	
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_2,
+				nest_coordinates = NEST_VARIANT_2,
+				obstacle_coordinates = OBSTACLE_VARIANT_2,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 10,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
+
+# ╔═╡ e1211fe6-1efa-4173-ba36-f33e6913a1e1
+
 
 # ╔═╡ 0223727a-0dd0-4f27-9ecd-d67ff4169f53
 # begin
@@ -417,30 +451,33 @@ begin
 end
 
 # ╔═╡ eb092e0b-ee95-47df-904d-4ee34ce05943
-# begin
-# 	"""
-# 	Animated variant with map defined by `VARIANT_3` variables.
-# 	"""
+begin
+	"""
+	Animated variant with map defined by `VARIANT_3` variables.
+	"""
 	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_VARIANT_3,
-# 				nest_coordinates = NEST_VARIANT_3,
-# 				obstacle_coordinates = OBSTACLE_VARIANT_3,
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 				pheromone_fade_rate = 0.00021,
-# 				search_depth = 50,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.495,
-# 				normalization_parameter = 0.0005,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_3,
+				nest_coordinates = NEST_VARIANT_3,
+				obstacle_coordinates = OBSTACLE_VARIANT_3,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 50,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
+
+# ╔═╡ 68f84e2f-4f1f-46c0-b4f1-6dce72d6b711
+
 
 # ╔═╡ 4941ab5c-c9f7-4de0-9711-c81927a52f68
 # begin
@@ -489,30 +526,30 @@ begin
 end
 
 # ╔═╡ 4dd90806-ff62-49dc-be11-16cf4e81975a
-# begin
-# 	"""
-# 	Animated variant with map defined by `VARIANT_4` variables.
-# 	"""
+begin
+	"""
+	Animated variant with map defined by `VARIANT_4` variables.
+	"""
 	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_VARIANT_4,
-# 				nest_coordinates = NEST_VARIANT_4,
-# 				obstacle_coordinates = OBSTACLE_VARIANT_4,
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 				pheromone_fade_rate = 0.00021,
-# 				search_depth = 10,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.495,
-# 				normalization_parameter = 0.0005,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_4,
+				nest_coordinates = NEST_VARIANT_4,
+				obstacle_coordinates = OBSTACLE_VARIANT_4,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 10,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
 
 # ╔═╡ ea4d58f4-4945-4883-a44a-3dbb19824193
 # begin
@@ -559,30 +596,30 @@ begin
 end
 
 # ╔═╡ 6732a55d-2ae3-43d2-b229-a404d8a54a15
-# begin
-# 	"""
-# 	Animated variant with map defined by `VARIANT_5` variables.
-# 	"""
+begin
+	"""
+	Animated variant with map defined by `VARIANT_5` variables.
+	"""
 	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_VARIANT_5,
-# 				nest_coordinates = NEST_VARIANT_5,
-# 				obstacle_coordinates = OBSTACLE_VARIANT_5,
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 				pheromone_fade_rate = 0.00021,
-# 				search_depth = 10,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.495,
-# 				normalization_parameter = 0.0005,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_5,
+				nest_coordinates = NEST_VARIANT_5,
+				obstacle_coordinates = OBSTACLE_VARIANT_5,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 10,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
 
 # ╔═╡ 97514545-2661-40cd-9127-2d13df72dd0f
 # begin
@@ -622,7 +659,7 @@ end
 # ╔═╡ ab709e50-3caf-44ca-81ec-49b48f7dff3c
 begin
 	"""
-	Animated variant with map defined by `VARIANT_5` variables.
+	Animated variant with map defined by `VARIANT_6` variables.
 	"""
 	
 	AntsModel.sim!(
@@ -658,12 +695,18 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[BitFlags]]
+git-tree-sha1 = "43b1a4a8f797c1cddadf60499a8a077d4af2cd2d"
+uuid = "d1d4a3ce-64b1-5f1a-9ba4-7e7e69966f35"
+version = "0.1.7"
 
 [[Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -688,6 +731,12 @@ deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
 git-tree-sha1 = "485193efd2176b88e6622a39a246f8c5b600e74e"
 uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
 version = "0.1.6"
+
+[[CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "9c209fb7536406834aa938fb149964b985de6c83"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.1"
 
 [[ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Random", "SnoopPrecompile"]
@@ -715,13 +764,14 @@ version = "0.12.10"
 
 [[Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
-git-tree-sha1 = "61fdd77467a5c3ad071ef8277ac6bd6af7dd4c04"
+git-tree-sha1 = "7a60c856b9fa189eb34f5f8a6f6b5529b7942957"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.6.0"
+version = "4.6.1"
 
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[Contour]]
 git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
@@ -734,10 +784,10 @@ uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.14.0"
 
 [[DataStructures]]
-deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "88d48e133e6d3dd68183309877eac74393daa7eb"
+deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
+git-tree-sha1 = "d1fff3a548102f48987a52a2e0d114fa97d730f0"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.20"
+version = "0.18.13"
 
 [[Dates]]
 deps = ["Printf"]
@@ -749,13 +799,14 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DocStringExtensions]]
 deps = ["LibGit2"]
-git-tree-sha1 = "b19534d1895d702889b219c382a6e18010797f0b"
+git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-version = "0.8.6"
+version = "0.9.3"
 
 [[Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -774,6 +825,9 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "74faea50c1d007c85837327f6775bea60b5492dd"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.2+2"
+
+[[FileWatching]]
+uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[FixedPointNumbers]]
 deps = ["Statistics"]
@@ -813,15 +867,15 @@ version = "3.3.8+0"
 
 [[GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
-git-tree-sha1 = "660b2ea2ec2b010bb02823c6d0ff6afd9bdc5c16"
+git-tree-sha1 = "4423d87dc2d3201f3f1768a29e807ddc8cc867ef"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.71.7"
+version = "0.71.8"
 
 [[GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "d5e1fd17ac7f3aa4c5287a61ee28d4f8b8e98873"
+git-tree-sha1 = "3657eb348d44575cc5560c80d7e55b812ff6ffe1"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.71.7+0"
+version = "0.71.8+0"
 
 [[Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -847,10 +901,10 @@ uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
 
 [[HTTP]]
-deps = ["Base64", "Dates", "IniFile", "MbedTLS", "Sockets"]
-git-tree-sha1 = "c7ec02c4c6a039a98a15f955462cd7aea5df4508"
+deps = ["Base64", "CodecZlib", "Dates", "IniFile", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
+git-tree-sha1 = "37e4657cd56b11abe3d10cd4a1ec5fbdb4180263"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "0.8.19"
+version = "1.7.4"
 
 [[HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
@@ -874,9 +928,9 @@ uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
 
 [[IrrationalConstants]]
-git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
+git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
-version = "0.1.1"
+version = "0.2.2"
 
 [[JLFzf]]
 deps = ["Pipe", "REPL", "Random", "fzf_jll"]
@@ -934,10 +988,12 @@ version = "0.15.18"
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.84.0+0"
 
 [[LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -946,6 +1002,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -999,7 +1056,7 @@ uuid = "38a345b3-de98-5d2b-a5d3-14cd9215e700"
 version = "2.36.0+0"
 
 [[LinearAlgebra]]
-deps = ["Libdl"]
+deps = ["Libdl", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[LogExpFunctions]]
@@ -1010,6 +1067,12 @@ version = "0.3.23"
 
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+
+[[LoggingExtras]]
+deps = ["Dates", "Logging"]
+git-tree-sha1 = "cedb76b37bc5a6c702ade66be44f831fa23c681e"
+uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
+version = "1.0.0"
 
 [[MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1030,6 +1093,7 @@ version = "1.1.7"
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[Measures]]
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
@@ -1047,6 +1111,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -1056,6 +1121,7 @@ version = "1.0.2"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1063,9 +1129,21 @@ git-tree-sha1 = "887579a3eb005446d514ab7aeac5d1d027658b8f"
 uuid = "e7412a2a-1a6e-54c0-be00-318e2571c051"
 version = "1.3.5+1"
 
+[[OpenBLAS_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
+uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
+
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
+
+[[OpenSSL]]
+deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
+git-tree-sha1 = "6503b77492fd7fcb9379bf73cd31035670e3c509"
+uuid = "4d8831e6-92b7-49fb-bdf8-b643e874388c"
+version = "1.3.3"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1093,12 +1171,13 @@ version = "1.4.1"
 [[PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
+version = "10.40.0+0"
 
 [[Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
-git-tree-sha1 = "6f4fbcd1ad45905a5dee3f4256fabb49aa2110c6"
+git-tree-sha1 = "478ac6c952fddd4399e71d4779797c538d0ff2bf"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.5.7"
+version = "2.5.8"
 
 [[Pipe]]
 git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
@@ -1114,6 +1193,7 @@ version = "0.40.1+0"
 [[Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1129,9 +1209,9 @@ version = "1.3.4"
 
 [[Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Preferences", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SnoopPrecompile", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "8ac949bd0ebc46a44afb1fdca1094554a84b086e"
+git-tree-sha1 = "f49a45a239e13333b8b936120fe6d793fe58a972"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.38.5"
+version = "1.38.8"
 
 [[Preferences]]
 deps = ["TOML"]
@@ -1154,7 +1234,7 @@ deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[Random]]
-deps = ["Serialization"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[RecipesBase]]
@@ -1188,12 +1268,13 @@ version = "1.3.0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[Scratch]]
 deps = ["Dates"]
-git-tree-sha1 = "f94f779c94e58bf9ea243e77a37e16d9de9126bd"
+git-tree-sha1 = "30449ee12237627992a99d5e30ae63e4d78cd24a"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
-version = "1.1.1"
+version = "1.2.0"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1203,6 +1284,11 @@ deps = ["Dates", "Grisu"]
 git-tree-sha1 = "91eddf657aca81df9ae6ceb20b959ae5653ad1de"
 uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 version = "1.0.3"
+
+[[SimpleBufferStream]]
+git-tree-sha1 = "874e8867b33a00e784c8a7e4b60afe9e037b74e1"
+uuid = "777ac1f9-54b0-4bf8-805c-2214025038e7"
+version = "1.1.0"
 
 [[SnoopPrecompile]]
 deps = ["Preferences"]
@@ -1225,9 +1311,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[SpecialFunctions]]
 deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "d75bda01f8c31ebb72df80a46c88b25d1c79c56d"
+git-tree-sha1 = "ef28127915f4229c971eb43f3fc075dd3fe91880"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.1.7"
+version = "2.2.0"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1248,10 +1334,12 @@ version = "0.33.21"
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1262,6 +1350,17 @@ version = "0.1.1"
 [[Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[TranscodingStreams]]
+deps = ["Random", "Test"]
+git-tree-sha1 = "94f38103c984f89cf77c402f2a68dbd870f8165f"
+uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
+version = "0.9.11"
+
+[[URIs]]
+git-tree-sha1 = "074f993b0ca030848b897beff716d93aca60f06a"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.4.2"
 
 [[UUIDs]]
 deps = ["Random", "SHA"]
@@ -1277,9 +1376,9 @@ uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
 
 [[Unzip]]
-git-tree-sha1 = "34db80951901073501137bdbc3d5a8e7bbd06670"
+git-tree-sha1 = "ca0969166a028236229f63514992fc073799bb78"
 uuid = "41fe7b60-77ed-43a1-b4f0-825fd5a5650d"
-version = "0.1.2"
+version = "0.2.0"
 
 [[Wayland_jll]]
 deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg", "XML2_jll"]
@@ -1434,6 +1533,7 @@ version = "1.4.0+3"
 [[Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1459,6 +1559,11 @@ git-tree-sha1 = "5982a94fcba20f02f42ace44b9894ee2b140fe47"
 uuid = "0ac62f75-1d6f-5e53-bd7c-93b484bb37c0"
 version = "0.15.1+0"
 
+[[libblastrampoline_jll]]
+deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
+uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
+
 [[libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "daacc84a041563f965be61859a36e17c4e4fcd55"
@@ -1480,10 +1585,12 @@ version = "1.3.7+1"
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.48.0+0"
 
 [[p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1506,9 +1613,11 @@ version = "1.4.1+0"
 
 # ╔═╡ Cell order:
 # ╠═78142762-ae33-11ed-3e6b-75b2fc3af2b5
+# ╠═9cb64897-e862-444b-8435-54a90fc8690c
 # ╠═b94e4c8c-5335-4e99-b92a-28d5a5b00b1b
 # ╠═1f1d6b11-6d87-4ff2-81c7-0f2ba2ceffec
 # ╠═23d7831b-233e-457b-839c-81955bd824a7
+# ╠═d661c668-fa91-4964-8817-22cdba31c38b
 # ╠═5428328c-f34f-4221-a16d-bc343eff8a4b
 # ╠═59fae562-b2a9-4926-89d2-10f94b936fb8
 # ╟─3a0450e1-7009-4494-a8f2-514409a36727
@@ -1525,24 +1634,27 @@ version = "1.4.1+0"
 # ╟─049b60e2-13e3-4c0d-bb58-9ef415328abd
 # ╠═9c100f25-a7c0-4a19-97ef-7df25b23f222
 # ╠═359185c3-32cf-4418-b791-dd122d0be554
+# ╠═c8a77bc4-58f4-42c6-872e-37019c6f1a79
 # ╠═3745f7aa-ae46-4307-bfa8-47bf518dde8f
 # ╠═2372d2b9-d30a-4772-b826-54c03d980f7e
 # ╠═7e1df792-4b2d-4816-ae84-a5adc1ce9e09
 # ╠═f4bd62af-e81f-467e-b8ce-ca19d47e2dee
 # ╠═4125fd48-1b77-4f32-a5ed-79a59797edba
+# ╠═e1211fe6-1efa-4173-ba36-f33e6913a1e1
 # ╠═0223727a-0dd0-4f27-9ecd-d67ff4169f53
 # ╠═8615fffe-1970-4f8a-ab77-fb798411ea25
 # ╟─03a047d1-d48b-4558-b433-3f7cc8031e5a
 # ╠═d4866da1-2128-4968-a72b-022cdd879516
 # ╠═eb092e0b-ee95-47df-904d-4ee34ce05943
+# ╠═68f84e2f-4f1f-46c0-b4f1-6dce72d6b711
 # ╠═4941ab5c-c9f7-4de0-9711-c81927a52f68
 # ╠═d900a7d0-a07f-4dda-a98f-b8850780ff49
-# ╠═5ca84557-316a-47bd-897b-3deacdccface
+# ╟─5ca84557-316a-47bd-897b-3deacdccface
 # ╠═365fba99-5528-4a23-9a84-a42647fa5d7d
 # ╠═4dd90806-ff62-49dc-be11-16cf4e81975a
 # ╠═ea4d58f4-4945-4883-a44a-3dbb19824193
 # ╠═95fafcd5-9efb-4e29-85ea-d9f0baa09801
-# ╠═3d529786-248f-4235-a9a7-454d2454a437
+# ╟─3d529786-248f-4235-a9a7-454d2454a437
 # ╠═b399cb54-cf61-4b71-804a-fd4103584293
 # ╠═6732a55d-2ae3-43d2-b229-a404d8a54a15
 # ╠═97514545-2661-40cd-9127-2d13df72dd0f

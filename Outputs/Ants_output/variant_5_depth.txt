@@ -1,6 +1,8 @@
 Experiments for `search_depth` on `VARIANT_5` map with 8000 iterations.
 search_depth=0:1:50
+Total amount of food on the map: 220
 ---------------------------------------------------
+
 search_depth num_food
 ---------------------------------------------------
 0 14

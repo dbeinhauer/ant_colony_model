@@ -1,6 +1,8 @@
 Experiments for `num_ants` on `VARIANT_5` map with 8000 iterations.
 num_ants=20:10:2000
+Total amount of food on the map: 220
 ---------------------------------------------------
+
 num_ants num_food
 ---------------------------------------------------
 20 4
