@@ -77,10 +77,17 @@ Ideálně by měl model zachytit kolektivní chování mravenců při hledání 
 Mravenci by měli být schopni jednoduchou lokální signalizací pomocí
 vypouštění feromonu co nejvíce optimalizovat trasu pro zásobování hnízda
 potravou. V modelu je dále možné zkoumat různé varianty map s různě 
-rozmístěnými překážkami, hnízdy i 
+rozmístěnými překážkami, hnízdy i potravou.
+
 \section*{Výsledky}
 
-TODO: popsat vysledky vyberu parametru
+V analýze modelu jsme se zaměřili především na chování mravenců v různých
+variantách prostředí. Dále jsme se zaměřili na závislost počtu
+jedinců (parametr $n$) a maximální vzdálenosti pro detekci hledaného 
+objektu (parametr $d$). Zbylé parametry jsme zvolili pevně na základě
+porovnávání výsledků pro různé hodnoty. 
+
+
 
 TODO: porovnat jednotlive mapy
 
@@ -194,18 +201,58 @@ Tabulce (\ref{table:parametry}) obsahuje podrobnější popis parametrů modelu.
   \toprule
   Parametr & Popis \\
   \midrule
-    $n \in \mathbb{N}$ & Počet mravenců v simulaci. \\ 
-    $f \in (0, 1)$ & Rychlost vyprchávání feromonu. \\
-    $d \in \mathbb{N}_0$ & Maximální vzdálenost pro detekování cílového objektu.\\
-    $p \in (0, 1)$ & Množství feromonu vypuštěného 1 mravencem (část maximální hladiny).\\
-    $r \in (0, 1)$ & Část feromonu, jenž se při difuzi rozprostře do sousedství. \\
-    $c \in \mathbb{R}_0^{+}$ & Parametr snížení vlivu feromonu.\\ 
+    $n \in \mathbb{N}$ & Počet mravenců v simulaci 
+    (\texttt{num\_ants}). \\ 
+    $f \in (0, 1)$ & Rychlost vyprchávání feromonu 
+    (\texttt{pheromone\_fade\_rate}). \\
+    $d \in \mathbb{N}_0$ & Maximální vzdálenost pro detekování 
+    cílového objektu (\texttt{search\_depth}).\\
+    $p \in (0, 1)$ & Množství feromonu vypuštěného 1 mravencem 
+    (část maximální hladiny) (\texttt{pheromone\_power}).\\
+    $r \in (0, 1)$ & Část feromonu, jenž se při difuzi rozprostře do 
+    sousedství (\texttt{difusion\_rate}). \\
+    $c \in \mathbb{R}_0^{+}$ & Parametr snížení vlivu feromonu
+    (\texttt{normalization\_parameter}).\\ 
   \bottomrule
   \end{tabular}
   \caption{Seznam parametrů modelu.} \label{table:parametry} 
 \end{table}
 
 \subsection*{Analýza modelu}
+
+Veškeré zdrojové kódy implementace modelu a pro analýzu výsledků společně s
+výsledky experimentů a jejich podrobným nastavením jsou k nahlédnutí v 
+githubovém repozitáři 
+\footnote{\url{https://github.com/dbeinhauer/ant_colony_model}}. Model je 
+naimplementován v jazyce Julia v prostředí Pluto. Výsledky byly analyzovány
+za pomoci jazyku Python v prostředí Jupyter Lab.
+
+\subsection*{Výběr parametrů}
+V analýze modelu jsme se zaměřili pouze na vybrané parametry modelu. Zbylé
+parametry jsme museli vhodně zvolit. Pro ohodnocení kvality volby
+parametrů jsme použili množství sesbírané potravy v základním prostředí
+(varianta 0 TODO: asi nejaky odkaz). Zkoumali jsme rychlost 
+vyprchávání feromonu (parametr $f$), množství feromonu difundovaného do 
+sousedství (parametr $r$) a míru vlivu feromonu (parametr $c$). Parametr
+určující množství feromonu vypuštěné jedním mravencem (parametr $p$) jsme
+zvolili pevně ($p = 0.02$), jelikož část vlastností tohoto parametru závisí
+na volbě parametru $f$ (rychlostí vyprchávání feromonu $f$ lze upravovat
+míra vlivu feromonu jednoho mravence v čase) a v rámci zjednodušení analýzy
+parametrů jsme se rozhodli pro pevnou hodnotu. Hlavním důsledkem volby 
+volby parametru $p$ je maximální kapacita hladiny feromonu, která v našem 
+případě odpovídá množství feromonu vypuštěného $50$ mravenci.
+
+Výběr parametrů jsme rozdělili na 2 části. V první části jsme porovnávali
+množství potravy získané během $4000$ iterací simulace s parametry s 
+hodnotami v rozmezí $f \in (0.0001, 0.001)$, $r \in (0, 1)$ a 
+$c \in (0, 0.001)$. Z výsledků tohoto experimentu jsme vybrali 20 
+hodnot parametru $c$ s nejvyšším počet sesbírané potravy a spočítali 
+jejich aritmetický průměr, jenž je roven $0.00045$. Rozhodli jsme se 
+zvolit mírně vyšší hodnotu $c = 0.0005$, jelikož výsledky pro hodnotu 
+$c=0.001$ často prokazovaly nejlepší výsledky (viz. TODO: odkaz na grafy
+závislosti parametru c).
+
+TODO: popsat vysledky vyberu parametru
 
 TODO: popis nastavení modelu a vlastností modelu
 
