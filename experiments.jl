@@ -36,6 +36,56 @@ function compute_num_food(
 	return total_food
 end
 
+# ╔═╡ f03578ab-8ab0-4564-b7e3-6c368b61eb5a
+"""
+	draw_map(simulation_map, ants, title)
+
+Draw the map.
+"""
+function draw_map(
+		simulation_map, 
+		ants;
+		title::String = ""
+	)
+	
+	p = AntsModel.Plots.plot(
+			map(s -> AntsModel.Plots.RGBA(0, 0, 0, 0.0), simulation_map.map_objects),
+			background_color=:black,
+		#foreground_color=:black,
+		)
+	
+	p[1][1][:z] = AntsModel.choose_animation(
+		simulation_map, 
+		ants, 
+		animation_type=AntsModel.PHEROMONE_ANIM)
+	AntsModel.Plots.title!(title)
+
+	return p
+end
+
+# ╔═╡ 77ef1c2a-e783-4a38-9571-bd6082c8d1cc
+# function draw_map!(
+#         p,  # existing plot object
+#         simulation_map,
+#         ants;
+#         title::String = ""
+#     )
+# 	p = AntsModel.Plots.plot(
+# 		map(s -> AntsModel.Plots.RGBA(0, 0, 0, 0.0), simulation_map.map_objects),
+# 		background_color=:black,
+# 	#foreground_color=:black,
+# 	)
+	
+#     p[1][1][:z] = AntsModel.choose_animation(
+#         simulation_map, 
+#         ants, 
+#         animation_type=AntsModel.PHEROMONE_ANIM)
+#     AntsModel.Plots.title!(title)
+#     # AntsModel.Plots.plot!(p)  # add the current plot to the existing plot object
+
+# 	return p
+# end
+
 # ╔═╡ b94e4c8c-5335-4e99-b92a-28d5a5b00b1b
 """
 	print_experiment_header(food_coordinates, title_line = "", parameters_line = "", table_header = "")
@@ -273,6 +323,15 @@ begin
 		)
 end
 
+# ╔═╡ 1f43e2bb-eeac-4786-95d2-89f6af0cf64e
+begin
+	# simulation_map, ants, _ = AntsModel.init_simulation()
+	draw_map(
+		AntsModel.init_simulation()[1:2]..., 
+		title="Nejakej title"
+	)
+end
+
 # ╔═╡ 22565199-80fe-4862-ab38-f397f63c706f
 # begin
 # 	run_experiments(
@@ -304,8 +363,43 @@ begin
 		(75:100, 80:80), (75:75, 80:93)]
 end
 
-# ╔═╡ c8a77bc4-58f4-42c6-872e-37019c6f1a79
+# ╔═╡ 359185c3-32cf-4418-b791-dd122d0be554
+begin
+	"""
+	Animated variant with map defined by `VARIANT_1` variables.
+	"""
+	
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_1,
+				nest_coordinates = NEST_VARIANT_1,
+				obstacle_coordinates = OBSTACLE_VARIANT_1,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 10,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
 
+# ╔═╡ c8a77bc4-58f4-42c6-872e-37019c6f1a79
+begin
+	draw_map(
+		AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_1,
+				nest_coordinates = NEST_VARIANT_1,
+				obstacle_coordinates = OBSTACLE_VARIANT_1
+		)[1:2]..., 
+		title="Nejakej title"
+	)
+end
 
 # ╔═╡ 3745f7aa-ae46-4307-bfa8-47bf518dde8f
 # begin
@@ -351,32 +445,6 @@ begin
 		]
 end
 
-# ╔═╡ 359185c3-32cf-4418-b791-dd122d0be554
-begin
-	"""
-	Animated variant with map defined by `VARIANT_1` variables.
-	"""
-	
-	AntsModel.sim!(
-			AntsModel.init_simulation(
-				food_coordinates = FOOD_VARIANT_1,
-				nest_coordinates = NEST_VARIANT_2,
-				obstacle_coordinates = OBSTACLE_VARIANT_1,
-				# num_ants = 400,
-				# search_depth = 10,
-				pheromone_fade_rate = 0.00021,
-				search_depth = 10,
-				pheromone_power = 0.02,
-				difusion_rate = 0.495,
-				normalization_parameter = 0.0005,
-			)..., 
-			num_iterations = 4000, 
-			# animation_type = AntsModel.PHEROMONE_ANIM,
-			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-			animate = true,
-		)
-end
-
 # ╔═╡ 4125fd48-1b77-4f32-a5ed-79a59797edba
 begin
 	"""
@@ -404,7 +472,16 @@ begin
 end
 
 # ╔═╡ e1211fe6-1efa-4173-ba36-f33e6913a1e1
-
+begin
+	draw_map(
+		AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_2,
+				nest_coordinates = NEST_VARIANT_2,
+				obstacle_coordinates = OBSTACLE_VARIANT_2
+		)[1:2]..., 
+		title="Nejakej title"
+	)
+end
 
 # ╔═╡ 0223727a-0dd0-4f27-9ecd-d67ff4169f53
 # begin
@@ -595,6 +672,70 @@ begin
 		]
 end
 
+# ╔═╡ cf5d17bc-900a-4420-a863-dbbf8b64d54a
+begin
+	using Plots
+	using RecipesPipeline
+
+	plot_array = []
+	
+	food_variants = [
+		DEFAULT_FOOD_COORDINATES,
+		FOOD_VARIANT_1,
+		FOOD_VARIANT_2,
+		FOOD_VARIANT_3,
+		FOOD_VARIANT_4,
+		FOOD_VARIANT_5,
+	]
+	
+	nest_variants = [
+		DEFAULT_NEST_COORDINATES,
+		NEST_VARIANT_1,
+		NEST_VARIANT_2,
+		NEST_VARIANT_3,
+		NEST_VARIANT_4,
+		NEST_VARIANT_5,
+	]
+	
+	obstacle_variants = [
+		DEFAULT_OBSTACLE_COORDINATES,
+		OBSTACLE_VARIANT_1,
+		OBSTACLE_VARIANT_2,
+		OBSTACLE_VARIANT_3,
+		OBSTACLE_VARIANT_4,
+		OBSTACLE_VARIANT_5,
+	]
+	
+	for i in 1:length(food_variants)
+		print(i)		
+		title = "Map $i"
+		p = draw_map(
+			AntsModel.init_simulation(
+					food_coordinates = food_variants[i],
+					nest_coordinates = nest_variants[i],
+					obstacle_coordinates = obstacle_variants[i]
+			)[1:2]...,
+			title=title
+		)
+		p = surface(p[1][1][:z])
+		# AntsModel.Plots.rotate_ticks!(p, pi/2)
+	    push!(plot_array, p)
+	end
+	
+	AntsModel.Plots.plot(
+		plot_array..., 
+		layout=(2, 3),
+		ticks=([], []), 
+		showaxis=false,
+		title=["0" "1" "2" "3" "4" "5"],
+		xlims=(0, 100),
+		ylims=(0, 100),
+		subplot_padding=(0.1,0.1)
+		# margin = 5mm,
+		)
+
+end
+
 # ╔═╡ 6732a55d-2ae3-43d2-b229-a404d8a54a15
 begin
 	"""
@@ -687,6 +828,11 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+RecipesPipeline = "01d81517-befc-4cb6-b9ec-a95719d0359c"
+
+[compat]
+Plots = "~1.38.8"
+RecipesPipeline = "~0.6.11"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -1164,9 +1310,9 @@ uuid = "91d4177d-7536-5919-b921-800302f37372"
 version = "1.3.2+0"
 
 [[OrderedCollections]]
-git-tree-sha1 = "85f8e6578bf1f9ee0d11e7bb1b1456435479d47c"
+git-tree-sha1 = "d321bf2de576bf25ec4d3e4360faca399afca282"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.4.1"
+version = "1.6.0"
 
 [[PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1321,9 +1467,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[StatsAPI]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "f9af7f195fb13589dd2e2d57fdb401717d2eb1f6"
+git-tree-sha1 = "45a7769a04a3cf80da1c1c7c60caf932e6f4c9f7"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.5.0"
+version = "1.6.0"
 
 [[StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
@@ -1614,6 +1760,9 @@ version = "1.4.1+0"
 # ╔═╡ Cell order:
 # ╠═78142762-ae33-11ed-3e6b-75b2fc3af2b5
 # ╠═9cb64897-e862-444b-8435-54a90fc8690c
+# ╠═f03578ab-8ab0-4564-b7e3-6c368b61eb5a
+# ╠═77ef1c2a-e783-4a38-9571-bd6082c8d1cc
+# ╠═cf5d17bc-900a-4420-a863-dbbf8b64d54a
 # ╠═b94e4c8c-5335-4e99-b92a-28d5a5b00b1b
 # ╠═1f1d6b11-6d87-4ff2-81c7-0f2ba2ceffec
 # ╠═23d7831b-233e-457b-839c-81955bd824a7
@@ -1629,6 +1778,7 @@ version = "1.4.1+0"
 # ╠═2f016ebe-9f08-4948-a995-af037341aab0
 # ╟─bb39e826-5bc0-46b7-8a95-22d84181e2ff
 # ╠═be442933-4574-4abc-a692-fc94fda5edf7
+# ╠═1f43e2bb-eeac-4786-95d2-89f6af0cf64e
 # ╠═22565199-80fe-4862-ab38-f397f63c706f
 # ╠═16d61d98-75f0-47c8-8da9-18f954a22054
 # ╟─049b60e2-13e3-4c0d-bb58-9ef415328abd

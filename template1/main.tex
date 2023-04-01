@@ -87,6 +87,38 @@ jedinců (parametr $n$) a maximální vzdálenosti pro detekci hledaného
 objektu (parametr $d$). Zbylé parametry jsme zvolili pevně na základě
 porovnávání výsledků pro různé hodnoty. 
 
+\subsection*{Varianty map}
+Pro analýzu modelu jsme zvolili celkem 6 variant mapy s účelem otestovat
+chování modelu v prostředích s odlišnou charakteristikou. Zvolili jsme 
+jednotnou velikost mřížky prostředí, jež je rovna $100 \times 100$.
+Jednotlivé varianty se liší rozmístěním zdrojů potravy, mraveniště a překážek
+v prostředí.
+
+Základní varianta prostředí (ozn. jako \texttt{var-0}), jež je použita 
+také pro výběr parametrů, neobsahuje žádnou překážku. Prostředí obsahuje 
+jediné mraveniště umístěné přibližně uprostřed mapy a dva zdroje potravy
+umístěné v rozích mapy na společné diagonále. Zdroje potravy se od sebe 
+mírně liší vzdáleností od hnízda a velikostí. Další varianta 
+(ozn. \texttt{var-1}) je téměř identická vůči variantě
+\texttt{var-0}. Liší se však v obklopení téměř celého zdroje
+potravy překážkami s pouze malým prostorem pro vstup mravenců. Následující
+varianta (ozn. \texttt{var-2}) je jednoduché symetrické bludiště s hnízdem 
+na levém konci. Okolí hnízda je ohraničeno překážkami, jež vytváří podélný 
+průchod pro mravence směrem k potravě. V pravé části mapy je umístěno 
+rozdvojením na jejichž koncích jsou zdroje potravy. Úsek od rozdvojení
+k potravě je kratší než od hnízda k rozdvojení. Velmi podobné je rozložení
+další varianty (\texttt{var-3}). Lišící se od \texttt{var-2} pouze ve 
+vzdálenostech hnízda od rozdvojení, která je kratší, a rozdvojení od 
+zdrojů potravy, které jsou delší. Další z variant (ozn. jako \texttt{var-5})
+je v rozložení téměř totožná jako \texttt{var-2}. Liší se pouze v tom, že 
+jedna větev bludiště neobsahuje zdroj potravy. Poslední varianta (ozn. jako
+\texttt{var-4}) je koncipována jako průchod ve středu mapy s konci 
+obsahujícími zdroje potravy. Hnízdo je umístěno ve středu mapy, je 
+podélně ohraničeno překážkami vytvářející průchod. Na levém a pravém konci
+mapy jsou umístěny zdroje potravy.  
+
+
+
 
 
 TODO: porovnat jednotlive mapy
@@ -238,9 +270,11 @@ určující množství feromonu vypuštěné jedním mravencem (parametr $p$) js
 zvolili pevně ($p = 0.02$), jelikož část vlastností tohoto parametru závisí
 na volbě parametru $f$ (rychlostí vyprchávání feromonu $f$ lze upravovat
 míra vlivu feromonu jednoho mravence v čase) a v rámci zjednodušení analýzy
-parametrů jsme se rozhodli pro pevnou hodnotu. Hlavním důsledkem volby 
+parametrů jsme se rozhodli pro pevnou hodnotu.Hlavním důsledkem volby 
 volby parametru $p$ je maximální kapacita hladiny feromonu, která v našem 
-případě odpovídá množství feromonu vypuštěného $50$ mravenci.
+případě odpovídá množství feromonu vypuštěného $50$ mravenci. Počet 
+mravenců v simulacích jsme zvolili jako $n = 400$ a maximální vzdálenost 
+detekování cílového objektu jako $d = 10$. 
 
 Výběr parametrů jsme rozdělili na 2 části. V první části jsme porovnávali
 množství potravy získané během $4000$ iterací simulace s parametry s 
@@ -249,8 +283,82 @@ $c \in (0, 0.001)$. Z výsledků tohoto experimentu jsme vybrali 20
 hodnot parametru $c$ s nejvyšším počet sesbírané potravy a spočítali 
 jejich aritmetický průměr, jenž je roven $0.00045$. Rozhodli jsme se 
 zvolit mírně vyšší hodnotu $c = 0.0005$, jelikož výsledky pro hodnotu 
-$c=0.001$ často prokazovaly nejlepší výsledky (viz. TODO: odkaz na grafy
-závislosti parametru c).
+$c=0.001$ prokazovaly v části případů lepší výsledky oproti nižším hodnotám, 
+proto jsme také hodnotu parametru $c$ mírně zvýšili. Na výsledky experimentu
+můžeme podrobněji nahlédnout na grafech (\ref{fig:grid_search_1_fade}) a 
+(\ref{fig:grid_search_1_difusion}).
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.9\linewidth]{images/grid_search_1_fade.pdf}
+  \caption{Množství sesbírané potravy je vyšší v případě částečně náhodného
+  vlivu feromonu (varianty $c=0.0005$ a $c=0.001$). Množství sesbírané 
+  potravy klesá téměř lineárně s rostoucí rychlostí vyprchávání feromonu 
+  (parametr $f$).}
+  \label{fig:grid_search_1_fade}
+\end{figure}
+
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.9\linewidth]{images/grid_search_1_difusion.pdf}
+  \caption{Množství sesbírané potravy je vyšší v případě částečně náhodného
+  vlivu feromonu (varianty $c=0.0005$ a $c=0.001$). Množství sesbírané 
+  potravy není téměř ovlivněno změnou rychlosti difuze (parametr $r$). 
+  Výrazný pokles pozorujeme až kolem hodnoty $0.8$ a vyšší.}
+  \label{fig:grid_search_1_difusion}
+\end{figure}
+
+
+V druhé části výběru parametru jsme se zabývali pouze volbou parametru
+rychlosti vyprchávání feromonu $f \in (0.0001, 0.001)$ a rychlosti 
+difuze $r \in (0, 1)$. Porovnávali jsme množství sesbírané potravy za 
+$8000$ iterací simulace. S pevně zvolenými parametry jako v případě 
+první části a dále s parametrem $c = 0.0005$, jehož hodnotu jsme 
+odvodili v první části. Z výsledků jsme podobně jako v případě 
+první části vybrali 20 variant s nejvyšším počtem nasbírané potravy
+a vypočítali aritmetický průměr hodnot parametrů $f$ a $r$. Vypočtené 
+hodnoty jsou následující $f = 0.00021$ $r = 0.495$. Závislost vlivu 
+parametrů je srovnatelný s výsledky první části a je znázorněn
+grafy (\ref{fig:grid_search_2_fade}) a (\ref{fig:grid_search_2_difusion}).
+
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.9\linewidth]{images/grid_search_2_fade.pdf}
+  \caption{Množství sesbírané potravy klesá téměř lineárně s rostoucí 
+  rychlostí vyprchávání feromonu (parametr $f$). Vyjímkou jsou hodnoty
+  parametru $f$ do $0.0002$ u nichž je rozdíl téměř zanedbatelný.}
+  \label{fig:grid_search_2_fade}
+\end{figure}
+
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.9\linewidth]{images/grid_search_2_difusion.pdf}
+  \caption{Množství sesbírané potravy není téměř ovlivněno změnou rychlosti 
+  difuze (parametr $r$). Výrazný pokles pozorujeme až kolem hodnoty $0.8$ 
+  a vyšší.}
+  \label{fig:grid_search_2_difusion}
+\end{figure}
+
+
+\subsection*{Popis experimentů}
+Hlavní část experimentů byla zaměřena na charakteristiku chování mravenců v
+různých variantách prostředí s různým počtem jedinců (parametr $n$ v rozmezí 
+$(0, 50)$) a různou maximální vzdáleností pro detekci hledaného objektu 
+(parametr $d$ v rozmezí $(20, 2000)$). V experimentech jsme se zaměřovali 
+na poměr sesbírané potravy vůči celkovému počtu potravy na mapě po uplynutí
+$8000$ iterací simulace. Na základě výběru parametrů popsaných výše jsme 
+pevně zvolili následující hodnoty zbylých parametrů:
+
+\begin{itemize}
+  \item $f = 0.00021$
+  \item $p = 0.02$
+  \item $r = 0.495$
+  \item $c = 0.0005$
+\end{itemize}
+
 
 TODO: popsat vysledky vyberu parametru
 
