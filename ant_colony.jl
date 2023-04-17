@@ -709,18 +709,39 @@ function choose_animation(
 	# Pheromone colors
 	FOOD_PHER_COLOR = (250, 0, 0)
 	NEST_PHER_COLOR = (0, 250, 0)
+	COMBINED_COLOR = (250, 250, 0)
 
 	# Create RGBA color based on the RGB and alpha values.
 	set_color(rgb, alpha) = Plots.RGBA(rgb[1], rgb[2], rgb[3], alpha)
 
-	# Sets color based on the pheromones concentrations. 
+	
+	# sign.(simulation_map.nest_pheromones .- simulation_map.food_pheromones).* 
+	# (simulation_map.nest_pheromones .+ simulation_map.food_pheromones)
+
 	set_pheromone_color(food_pheromone, nest_pheromone) =
-		(set_color(FOOD_PHER_COLOR .* food_pheromone .+ 
-				NEST_PHER_COLOR .* nest_pheromone, 
-			#max(food_pheromone, nest_pheromone)^color_normalization
-			((food_pheromone + nest_pheromone) / 2)^color_normalization
+		(set_color(
+			food_pheromone + nest_pheromone < 1 ? 
+				(food_pheromone > nest_pheromone ? (FOOD_PHER_COLOR .* food_pheromone) : (NEST_PHER_COLOR .* nest_pheromone))
+					: (food_pheromone < nest_pheromone ? 
+						(FOOD_PHER_COLOR .* food_pheromone .+ 
+						NEST_PHER_COLOR .* nest_pheromone) 
+					: (FOOD_PHER_COLOR .* food_pheromone .+ 
+					NEST_PHER_COLOR .* nest_pheromone)) , 
+			# max(food_pheromone, nest_pheromone)#^color_normalization
+			# food_pheromone + nest_pheromone < 1 ? 
+			((food_pheromone + nest_pheromone) / 2)#^color_normalization
+			
 			)
 		)
+	
+	# Sets color based on the pheromones concentrations. 
+	# set_pheromone_color(food_pheromone, nest_pheromone) =
+	# 	(set_color(FOOD_PHER_COLOR .* food_pheromone .+ 
+	# 			NEST_PHER_COLOR .* nest_pheromone, 
+	# 		# max(food_pheromone, nest_pheromone)^color_normalization
+	# 		((food_pheromone + nest_pheromone) / 2)^color_normalization
+	# 		)
+	# 	)
 		
 	# Function to determine color of the pixel based on the map object and pheromones.
 	color_map_objects_pheromones(object, food_pheromone, nest_pheromone) = 
@@ -889,6 +910,7 @@ function sim!(
 			simulation_step!(simulation_map, ants, model_parameters)
 	
 			p[1][1][:z] = choose_animation(simulation_map, ants, animation_type=animation_type)
+			
 			Plots.title!("FOOD COUNTER: " * string(ants.nest_food[]))
 			
 		end every draw_each
@@ -908,26 +930,26 @@ function sim!(
 end
 
 # ╔═╡ 95959428-ee7f-4557-a84a-0e2f82f9d27c
-# begin
-# 	sim!(init_simulation(
-# 				grid_size = (100, 100),
-# 				food_coordinates = [(1:15, 1:20), (80:100, 85:95)],
-# 				nest_coordinates = [(45:52, 55:62)],
-# 				obstacle_coordinates = [(1:7, 25:26), (9:18, 25:26), (18:19, 1:25),
-# 				(75:100, 80:80), (75:75, 80:93)],
-# 				# num_ants = 400,
-# 				pheromone_fade_rate = 0.0005,
-# 				search_depth = 20,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.7,
-# 				normalization_parameter = 0.0001,
-# 			)..., 
-# 			num_iterations=4000, 
-# 			animation_type=PHEROMONE_ANIM,
-# 			animate=true,
-# 			color_normalization = 0.01,
-# 		)
-# end
+begin
+	sim!(init_simulation(
+				grid_size = (100, 100),
+				food_coordinates = [(1:15, 1:20), (80:100, 85:95)],
+				nest_coordinates = [(45:52, 55:62)],
+				obstacle_coordinates = [(1:7, 25:26), (9:18, 25:26), (18:19, 1:25),
+				(75:100, 80:80), (75:75, 80:93)],
+				# num_ants = 400,
+				pheromone_fade_rate = 0.0005,
+				search_depth = 20,
+				pheromone_power = 0.02,
+				difusion_rate = 0.7,
+				normalization_parameter = 0.0001,
+			)..., 
+			num_iterations=4000, 
+			animation_type=PHEROMONE_ANIM,
+			animate=true,
+			color_normalization = 0.01,
+		)
+end
 
 # ╔═╡ f9a3c633-a4d3-4368-88a9-06ae7e4eaba3
 # begin
@@ -946,23 +968,22 @@ end
 # end
 
 # ╔═╡ 38e68fae-0200-4c9c-9f3a-df44d0b1bf36
-# begin
-# 	sim!(init_simulation(grid_size = (50, 50),
-# 				food_coordinates = [(1:10, 1:13), (44:50, 1:10)],
-# 				nest_coordinates =  [(10:15, 40:45)],
-# 				obstacle_coordinates = [],
-# 				num_ants = 400,
-# 				num_iterations = 1000,
-# 				pheromone_fade_rate = 0.0005,
-# 				search_depth = 20,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.3,
-# 				normalization_parameter = 0.0001
-# 			)..., 
-# 			num_iterations=1000, 
-# 			animation_type=PHEROMONE_ANIM
-# 		)
-# end
+begin
+	sim!(init_simulation(grid_size = (50, 50),
+				food_coordinates = [(1:10, 1:13), (44:50, 1:10)],
+				nest_coordinates =  [(10:15, 40:45)],
+				obstacle_coordinates = [],
+				num_ants = 400,
+				pheromone_fade_rate = 0.0005,
+				search_depth = 20,
+				pheromone_power = 0.02,
+				difusion_rate = 0.3,
+				normalization_parameter = 0.0001
+			)..., 
+			num_iterations=1000, 
+			animation_type=PHEROMONE_ANIM
+		)
+end
 
 # ╔═╡ f23ed720-e268-446a-9226-a4bd3f306cab
 # begin
@@ -1000,7 +1021,7 @@ end
 # 			difusion_rate = difusion,
 # 				)...,
 # 				animate = false,
-# 			)
+			# )
 # 		)
 # 	end
 # end

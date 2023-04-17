@@ -8,8 +8,6 @@ using InteractiveUtils
 begin
 	using Makie
 	using CairoMakie
-	# using AbstractPlotting.MakieLayout
-	# using AbstractPlotting
 	using Colors, ColorSchemes
 end
 
@@ -20,7 +18,7 @@ import Pkg
 Pkg.add("Plots")
 
 include("ant_colony.jl")
-
+# 
 end
 
 # ╔═╡ 9cb64897-e862-444b-8435-54a90fc8690c
@@ -70,12 +68,37 @@ function draw_map(
 	)
 end
 
+# ╔═╡ a4aae317-549d-439b-9bc2-f378e1ef5834
+begin
+# Generate example data
+data1 = rand(10, 10)  # First heatmap data
+data2 = rand(10, 10)  # Second heatmap data
+
+# Create figure
+fig = Figure()
+
+# Plot the first heatmap with transparency
+heatmap(fig[1, 1], data1, colormap=:viridis, alpha=0.5)
+
+# Plot the second heatmap with transparency
+heatmap!(fig[1, 1], data2, colormap=:inferno, alpha=0.5)
+
+# Add colorbar
+# colorbar!(fig[1, 1], label="Value")
+
+# Show the plot
+# display(fig)
+fig
+end
+
 # ╔═╡ bf268a10-ac94-452a-8436-834e7befa111
 function draw_map_makie(
 		simulation_map, 
 		ants,
 		axs;
 		title::String = "",
+		draw_pher=false,
+		fig=nothing
 	)
 
 	map_objects_colors = Dict(
@@ -112,25 +135,74 @@ function draw_map_makie(
 	hidedecorations!(axs)  # hides ticks, grid and lables
 	hidespines!(axs) 
 
+	if !draw_pher
+		unique_values = sort(unique(simulation_map.map_objects))
 
-	unique_values = sort(unique(simulation_map.map_objects))
+		mycmap = ColorScheme([map_objects_colors[x] for x in unique_values])
+		return heatmap!(axs, 
+			simulation_map.map_objects,
+			colormap=cgrad(mycmap, size(unique_values)[1], categorical=true, )#rev=true),
+		)
+	end
 
-	mycmap = ColorScheme([map_objects_colors[x] for x in unique_values])
 
-
-	return heatmap!(axs, 
-		simulation_map.map_objects,
-		colormap=cgrad(mycmap, size(unique_values)[1], categorical=true, )#rev=true),
+	mycmap = ColorScheme(
+		[
+			AntsModel.hex2rgba(0xFFFF00),
+			AntsModel.hex2rgba(0xFF0000),
+			AntsModel.hex2rgba(0x000000),
+			AntsModel.hex2rgba(0x00FF00),
+			AntsModel.hex2rgba(0xFFFF00),
+		]
 	)
 	
-	# Create a heatmap plot for the simulation map
+	# # Create a heatmap plot for the simulation map
 	# return heatmap!(axs, 
-	# 		map(set_pheromone_color, 
-	# 			simulation_map.food_pheromones, simulation_map.nest_pheromones),
-			# map(s -> map_objects_colors[s], simulation_map.map_objects), 
-			# colorrange=AntsModel.hex2rgba(0x000000), 
-			# colorrange=(0, 1),
-			# colormap=Reverse(:viridis)
+	# 		map(color_map_objects_pheromones(simulation_map.map_objects, simulation_map.food_pheromones, simulation_map.nest_pheromones)),
+	# 		# map(set_pheromone_color, 
+	# 		# 	simulation_map.food_pheromones, simulation_map.nest_pheromones),
+	# 		# map(s -> map_objects_colors[s], simulation_map.map_objects), 
+	# 		# colorrange=AntsModel.hex2rgba(0x000000), 
+	# 		colorrange=(-1, 1),
+	# 		colormap=cgrad(mycmap, 2)
+	# )
+
+
+	heatmap_plot = heatmap!(axs, 
+			sign.(simulation_map.nest_pheromones .- simulation_map.food_pheromones).* (simulation_map.nest_pheromones .+ simulation_map.food_pheromones),
+			colorrange=(-2, 2),
+			colormap=cgrad(mycmap, 2),
+			alpha=0.5
+	)
+	
+	# pixel_x = 5
+	# pixel_y = 3
+	
+	# # Define a new RGBA color for the pixel
+	# new_color = RGBA(1.0, 0.0, 0.0, 1.0)  # Red color with full opacity
+
+	# unique_values = sort(unique(simulation_map.map_objects))
+
+	# mycmap = ColorScheme([map_objects_colors[x] for x in unique_values])
+	# return heatmap!(fig, 
+	# 	simulation_map.map_objects,
+	# 	colormap=cgrad(mycmap, size(unique_values)[1], categorical=true,),
+	# 	alpha=0.5#ev=true),
+	# )
+
+	# print(heatmap_plot)
+	
+	# # Update the color of the specific pixel in the heatmap
+	# heatmap_plot[1].olorrange = new_color   # Update the colorrange of the heatmap plot
+	# heatmap_plot[1].colormap = :grays        # Use a grayscale colormap
+	# heatmap_plot[1].data[pixel_x, pixel_y] = 1
+
+	return heatmap_plot
+
+	# return heatmap!(axs, 
+	# 		(simulation_map.nest_pheromones .- simulation_map.food_pheromones).* (simulation_map.nest_pheromones .+ simulation_map.food_pheromones),
+	# 		colorrange=(-2, 2),
+	# 		colormap=cgrad(mycmap, 2)
 	# )
 end
 
@@ -532,30 +604,30 @@ begin
 end
 
 # ╔═╡ 4125fd48-1b77-4f32-a5ed-79a59797edba
-# begin
-# 	"""
-# 	Animated variant with map defined by `VARIANT_2` variables.
-# 	"""
+begin
+	"""
+	Animated variant with map defined by `VARIANT_2` variables.
+	"""
 	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_VARIANT_2,
-# 				nest_coordinates = NEST_VARIANT_2,
-# 				obstacle_coordinates = OBSTACLE_VARIANT_2,
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 				pheromone_fade_rate = 0.00021,
-# 				search_depth = 10,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.495,
-# 				normalization_parameter = 0.0005,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_2,
+				nest_coordinates = NEST_VARIANT_2,
+				obstacle_coordinates = OBSTACLE_VARIANT_2,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 10,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
 
 # ╔═╡ 0223727a-0dd0-4f27-9ecd-d67ff4169f53
 # begin
@@ -627,9 +699,6 @@ end
 # 		)
 # end
 
-# ╔═╡ 68f84e2f-4f1f-46c0-b4f1-6dce72d6b711
-
-
 # ╔═╡ 4941ab5c-c9f7-4de0-9711-c81927a52f68
 # begin
 # 	run_experiments(
@@ -677,30 +746,30 @@ begin
 end
 
 # ╔═╡ 4dd90806-ff62-49dc-be11-16cf4e81975a
-# begin
-# 	"""
-# 	Animated variant with map defined by `VARIANT_4` variables.
-# 	"""
+begin
+	"""
+	Animated variant with map defined by `VARIANT_4` variables.
+	"""
 	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_VARIANT_4,
-# 				nest_coordinates = NEST_VARIANT_4,
-# 				obstacle_coordinates = OBSTACLE_VARIANT_4,
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 				pheromone_fade_rate = 0.00021,
-# 				search_depth = 10,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.495,
-# 				normalization_parameter = 0.0005,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
+	AntsModel.sim!(
+			AntsModel.init_simulation(
+				food_coordinates = FOOD_VARIANT_4,
+				nest_coordinates = NEST_VARIANT_4,
+				obstacle_coordinates = OBSTACLE_VARIANT_4,
+				# num_ants = 400,
+				# search_depth = 10,
+				pheromone_fade_rate = 0.00021,
+				search_depth = 10,
+				pheromone_power = 0.02,
+				difusion_rate = 0.495,
+				normalization_parameter = 0.0005,
+			)..., 
+			num_iterations = 4000, 
+			# animation_type = AntsModel.PHEROMONE_ANIM,
+			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+			animate = true,
+		)
+end
 
 # ╔═╡ ea4d58f4-4945-4883-a44a-3dbb19824193
 # begin
@@ -747,7 +816,7 @@ begin
 end
 
 # ╔═╡ 3f814e35-543b-47e6-9b05-c4409de5d02e
-function squares_layout()
+function draw_maze_variants()
     # Call the function for each variant and combine the plots
 	plot_array = []
 	
@@ -784,7 +853,8 @@ function squares_layout()
 	# Makie
     letters = reshape(collect('a':'f'), (width, height))
     fig = Figure(resolution=(600, 400), #font="CMU Serif",
-        backgroundcolor=:snow2)
+        #backgroundcolor=:snow2)
+	)
     axs = [Axis(fig[j, i], aspect=DataAspect()) for i = 1:width, j = 1:height]
 	
 	hms = [draw_map_makie(AntsModel.init_simulation(
@@ -830,11 +900,131 @@ function squares_layout()
 
     fig
 
-	save("test.png", fig)
+	# save("template1/images/variants_new.pdf", fig)
 end
 
 # ╔═╡ 5c9f12a6-01a8-4a85-a8b4-93cad94bff2a
-squares_layout()
+draw_maze_variants()
+
+# ╔═╡ f0331894-62dc-48fb-825f-cbc7704bf4d0
+function draw_pheromones()
+	plot_array = []
+	
+	food_variants = [
+		DEFAULT_FOOD_COORDINATES,
+		FOOD_VARIANT_1,
+		FOOD_VARIANT_2,
+		FOOD_VARIANT_3,
+		FOOD_VARIANT_4,
+		FOOD_VARIANT_5,
+	]
+	
+	nest_variants = [
+		DEFAULT_NEST_COORDINATES,
+		NEST_VARIANT_1,
+		NEST_VARIANT_2,
+		NEST_VARIANT_3,
+		NEST_VARIANT_4,
+		NEST_VARIANT_5,
+	]
+	
+	obstacle_variants = [
+		DEFAULT_OBSTACLE_COORDINATES,
+		OBSTACLE_VARIANT_1,
+		OBSTACLE_VARIANT_2,
+		OBSTACLE_VARIANT_3,
+		OBSTACLE_VARIANT_4,
+		OBSTACLE_VARIANT_5,
+	]
+
+	height = 2
+	width = 3
+	# height = 1
+	# width = 1
+
+	# Makie
+    # letters = reshape(collect('a':'f'), (width, height))
+    fig = Figure(resolution=(600, 400), #font="CMU Serif",
+        #backgroundcolor=:snow2)
+	)
+    axs = [Axis(fig[j, i], aspect=DataAspect()) for i = 1:width, j = 1:height]
+
+	hms = []
+	for i = 1:width
+		for j = 1:height
+			sim_model = AntsModel.init_simulation(
+					food_coordinates = food_variants[(j-1)*width + i],
+					nest_coordinates = nest_variants[(j-1)*width + i],
+					obstacle_coordinates = obstacle_variants[(j-1)*width + i]
+				)
+			AntsModel.sim!(
+				sim_model..., 
+				num_iterations=1000,
+				animate=false,
+			)
+			push!(hms, 
+				draw_map_makie(
+					sim_model[1:2]...,
+					axs[i, j];
+					title = "Variant-$i",
+					draw_pher = true,
+					fig = fig[i, j]
+				)
+			)
+		end
+	end
+
+	hms = reshape(hms, (width, height))
+	
+	# hms = [draw_map_makie(AntsModel.init_simulation(
+	# 					food_coordinates = food_variants[(j-1)*width + i],
+	# 					nest_coordinates = nest_variants[(j-1)*width + i],
+	# 					obstacle_coordinates = obstacle_variants[(j-1)*width + i]
+	# 			)[1:2]...,
+	# 			axs[i, j];
+	# 			title = "Variant-$i",
+	# 			draw_pher = true,
+	# 			) 
+	# 	for i = 1:width, j = 1:height
+	# ]
+
+	cbar = Colorbar(fig[1:2, 4], hms[2], label = "Objekty na mapě", height=Relative(3/4))
+
+	
+	# cbar.ticks = (
+	# 	[-0.66, 0.11, 0.88, 1.55], 
+	# 	["Překážka", "Volno", "Hnízdo","Potrava"]
+	# )
+
+
+	# label = Label(
+	# 		fig[1:2, 1:4, Top()],
+	# 		"Varianty prostředí modelu",
+	#         padding=(0, 0, 30, 0),
+	# 	)
+
+	# new_fontsize = 25
+	# label.textsize = new_fontsize
+	
+	# [Label(
+	# 	fig[j, i, Top()], 
+	# 	"($(letters[i, j])) var-$((j-1)*width + i - 1)",
+	# 	fontsize=10,
+	# 	padding=(0, 0, 0, 0),
+	# 	# halign=:center,
+	# 	valign=:bottom,
+	# 	) for i = 1:width, j = 1:height
+	# ]
+
+    colgap!(fig.layout, 10)
+    rowgap!(fig.layout, 0)
+
+    fig
+
+end
+
+# ╔═╡ 16f9ddbf-7615-479a-a65e-2c50e1d5dcde
+draw_pheromones()
 
 # ╔═╡ 6732a55d-2ae3-43d2-b229-a404d8a54a15
 # begin
@@ -931,6 +1121,7 @@ ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 CairoMakie = "~0.6.3"
@@ -1000,6 +1191,11 @@ version = "0.4.6"
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[BitFlags]]
+git-tree-sha1 = "43b1a4a8f797c1cddadf60499a8a077d4af2cd2d"
+uuid = "d1d4a3ce-64b1-5f1a-9ba4-7e7e69966f35"
+version = "0.1.7"
+
 [[Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
@@ -1040,6 +1236,12 @@ deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
 git-tree-sha1 = "485193efd2176b88e6622a39a246f8c5b600e74e"
 uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
 version = "0.1.6"
+
+[[CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "9c209fb7536406834aa938fb149964b985de6c83"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.1"
 
 [[ColorBrewer]]
 deps = ["Colors", "JSON", "Test"]
@@ -1107,6 +1309,10 @@ version = "1.0.0"
 [[Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[DelimitedFiles]]
+deps = ["Mmap"]
+uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DensityInterface]]
 deps = ["InverseFunctions", "Test"]
@@ -1234,6 +1440,24 @@ git-tree-sha1 = "aa31987c2ba8704e23c6c8ba8a4f769d5d7e4f91"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.10+0"
 
+[[GLFW_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]
+git-tree-sha1 = "d972031d28c8c8d9d7b41a536ad7bb0c2579caca"
+uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
+version = "3.3.8+0"
+
+[[GR]]
+deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
+git-tree-sha1 = "0635807d28a496bb60bc15f465da0107fb29649c"
+uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
+version = "0.72.0"
+
+[[GR_jll]]
+deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
+git-tree-sha1 = "99e248f643b052a77d2766fe1a16fb32b661afd4"
+uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
+version = "0.72.0+0"
+
 [[GeometryBasics]]
 deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
 git-tree-sha1 = "4136b8a5668341e58398bb472754bff4ba0456ff"
@@ -1274,6 +1498,12 @@ version = "0.5.7"
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
+
+[[HTTP]]
+deps = ["Base64", "CodecZlib", "Dates", "IniFile", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
+git-tree-sha1 = "37e4657cd56b11abe3d10cd4a1ec5fbdb4180263"
+uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+version = "1.7.4"
 
 [[HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
@@ -1320,6 +1550,11 @@ version = "0.9.8"
 git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
 uuid = "9b13fd28-a010-5f03-acff-a1bbcff69959"
 version = "1.0.0"
+
+[[IniFile]]
+git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
+uuid = "83e8ac13-25f8-5344-8a64-a9f2b223428f"
+version = "0.5.1"
 
 [[IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1370,6 +1605,12 @@ git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
 
+[[JLFzf]]
+deps = ["Pipe", "REPL", "Random", "fzf_jll"]
+git-tree-sha1 = "f377670cda23b6b7c1c0b3893e37451c5c1a2185"
+uuid = "1019f520-868f-41f5-a6de-eb00f4b6a39c"
+version = "0.1.5"
+
 [[JLLWrappers]]
 deps = ["Preferences"]
 git-tree-sha1 = "abc9885a7ca2052a736a600f7fa66209f96506e1"
@@ -1381,6 +1622,12 @@ deps = ["Dates", "Mmap", "Parsers", "Unicode"]
 git-tree-sha1 = "31e996f0a15c7b280ba9f76636b3ff9e2ae58c9a"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.4"
+
+[[JpegTurbo_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "6f2675ef130a300a112286de91973805fcc5ffbc"
+uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
+version = "2.1.91+0"
 
 [[KernelDensity]]
 deps = ["Distributions", "DocStringExtensions", "FFTW", "Interpolations", "StatsBase"]
@@ -1394,6 +1641,12 @@ git-tree-sha1 = "f6250b16881adf048549549fba48b1161acdac8c"
 uuid = "c1c5ebd0-6772-5130-a774-d5fcae4a789d"
 version = "3.100.1+0"
 
+[[LERC_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "bf36f528eec6634efc60d7ec062008f171071434"
+uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
+version = "3.0.0+1"
+
 [[LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e5b909bcf985c5e2605737d2ce278ed791b89be6"
@@ -1404,6 +1657,12 @@ version = "2.10.1+0"
 git-tree-sha1 = "f2355693d6778a178ade15952b7ac47a4ff97996"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.3.0"
+
+[[Latexify]]
+deps = ["Formatting", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Printf", "Requires"]
+git-tree-sha1 = "2422f47b34d4b127720a18f86fa7b1aa2e141f29"
+uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
+version = "0.15.18"
 
 [[LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
@@ -1443,6 +1702,12 @@ git-tree-sha1 = "64613c82a59c120435c067c2b809fc61cf5166ae"
 uuid = "d4300ac3-e22c-5743-9152-c294e39db1e4"
 version = "1.8.7+0"
 
+[[Libglvnd_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll", "Xorg_libXext_jll"]
+git-tree-sha1 = "6f73d1dd803986947b2c750138528a999a6c7733"
+uuid = "7e76a0d4-f3c7-5321-8279-8d96eeed0f29"
+version = "1.6.0+0"
+
 [[Libgpg_error_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "c333716e46366857753e273ce6a69ee0945a6db9"
@@ -1460,6 +1725,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "9c30530bf0effd46e15e0fdcf2b8636e78cbbd73"
 uuid = "4b2f31a3-9ecc-558c-b454-b3730dcb73e9"
 version = "2.35.0+0"
+
+[[Libtiff_jll]]
+deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
+git-tree-sha1 = "3eb79b0ca5764d4799c06699573fd8f533259713"
+uuid = "89763e89-9b03-5906-acba-b20f662cd828"
+version = "4.4.0+0"
 
 [[Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1479,6 +1750,12 @@ version = "0.3.23"
 
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+
+[[LoggingExtras]]
+deps = ["Dates", "Logging"]
+git-tree-sha1 = "cedb76b37bc5a6c702ade66be44f831fa23c681e"
+uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
+version = "1.0.0"
 
 [[MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg"]
@@ -1524,10 +1801,21 @@ git-tree-sha1 = "69b565c0ca7bf9dae18498b52431f854147ecbf3"
 uuid = "0a4f8689-d25c-4efe-a92b-7142dfc1aa53"
 version = "0.1.2"
 
+[[MbedTLS]]
+deps = ["Dates", "MbedTLS_jll", "MozillaCACerts_jll", "Random", "Sockets"]
+git-tree-sha1 = "03a9b9718f5682ecb107ac9f7308991db4ce395b"
+uuid = "739be429-bea8-5141-9913-cc70e7f3736d"
+version = "1.1.7"
+
 [[MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.0+0"
+
+[[Measures]]
+git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
+uuid = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
+version = "0.3.2"
 
 [[Missings]]
 deps = ["DataAPI"]
@@ -1590,6 +1878,12 @@ version = "0.3.20+0"
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
 version = "0.8.1+0"
+
+[[OpenSSL]]
+deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
+git-tree-sha1 = "e9d68fe4b5f78f215aa2f0e6e6dc9e9911d33048"
+uuid = "4d8831e6-92b7-49fb-bdf8-b643e874388c"
+version = "1.3.4"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1655,6 +1949,11 @@ git-tree-sha1 = "478ac6c952fddd4399e71d4779797c538d0ff2bf"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "2.5.8"
 
+[[Pipe]]
+git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
+uuid = "b98c9c47-44ae-5843-9183-064241ee97a0"
+version = "1.3.0"
+
 [[Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "b4f5d02549a10e20780a24fce72bea96b6329e29"
@@ -1666,11 +1965,23 @@ deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markd
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.8.0"
 
+[[PlotThemes]]
+deps = ["PlotUtils", "Statistics"]
+git-tree-sha1 = "1f03a2d339f42dca4a4da149c7e15e9b896ad899"
+uuid = "ccf2f8ad-2431-5c83-bf29-c5338b663b6a"
+version = "3.1.0"
+
 [[PlotUtils]]
 deps = ["ColorSchemes", "Colors", "Dates", "Printf", "Random", "Reexport", "SnoopPrecompile", "Statistics"]
 git-tree-sha1 = "c95373e73290cf50a8a22c3375e4625ded5c5280"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.3.4"
+
+[[Plots]]
+deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Preferences", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SnoopPrecompile", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
+git-tree-sha1 = "186d38ea29d5c4f238b2d9fe6e1653264101944b"
+uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+version = "1.38.9"
 
 [[PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
@@ -1686,6 +1997,12 @@ version = "1.3.0"
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[Qt5Base_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "xkbcommon_jll"]
+git-tree-sha1 = "0c03844e2231e12fda4d0086fd7cbe4098ee8dc5"
+uuid = "ea2cea3b-5b76-57ae-a6ef-0a8af62496e1"
+version = "5.15.3+2"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
@@ -1712,10 +2029,28 @@ git-tree-sha1 = "dc84268fe0e3335a62e315a3a7cf2afa7178a734"
 uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
 version = "0.4.3"
 
+[[RecipesBase]]
+deps = ["SnoopPrecompile"]
+git-tree-sha1 = "261dddd3b862bd2c940cf6ca4d1c8fe593e457c8"
+uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+version = "1.3.3"
+
+[[RecipesPipeline]]
+deps = ["Dates", "NaNMath", "PlotUtils", "RecipesBase", "SnoopPrecompile"]
+git-tree-sha1 = "e974477be88cb5e3040009f3767611bc6357846f"
+uuid = "01d81517-befc-4cb6-b9ec-a95719d0359c"
+version = "0.6.11"
+
 [[Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "1.2.2"
+
+[[RelocatableFolders]]
+deps = ["SHA", "Scratch"]
+git-tree-sha1 = "90bc7a7c96410424509e4263e277e43250c05691"
+uuid = "05181044-ff0b-4ac5-8273-598c1e38db00"
+version = "1.0.0"
 
 [[Requires]]
 deps = ["UUIDs"]
@@ -1751,6 +2086,12 @@ git-tree-sha1 = "2436b15f376005e8790e318329560dcc67188e84"
 uuid = "7b38b023-a4d7-4c5e-8d43-3f3097f304eb"
 version = "0.3.3"
 
+[[Scratch]]
+deps = ["Dates"]
+git-tree-sha1 = "30449ee12237627992a99d5e30ae63e4d78cd24a"
+uuid = "6c6a2e73-6563-6170-7368-637461726353"
+version = "1.2.0"
+
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
@@ -1769,6 +2110,11 @@ deps = ["Random", "Statistics", "Test"]
 git-tree-sha1 = "d263a08ec505853a5ff1c1ebde2070419e3f28e9"
 uuid = "73760f76-fbc4-59ce-8f25-708e95d2df96"
 version = "0.4.0"
+
+[[SimpleBufferStream]]
+git-tree-sha1 = "874e8867b33a00e784c8a7e4b60afe9e037b74e1"
+uuid = "777ac1f9-54b0-4bf8-805c-2214025038e7"
+version = "1.1.0"
 
 [[SimpleTraits]]
 deps = ["InteractiveUtils", "MacroTools"]
@@ -1900,6 +2246,11 @@ git-tree-sha1 = "0b829474fed270a4b0ab07117dce9b9a2fa7581a"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.12"
 
+[[URIs]]
+git-tree-sha1 = "074f993b0ca030848b897beff716d93aca60f06a"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.4.2"
+
 [[UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -1912,6 +2263,23 @@ deps = ["REPL"]
 git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
+
+[[Unzip]]
+git-tree-sha1 = "ca0969166a028236229f63514992fc073799bb78"
+uuid = "41fe7b60-77ed-43a1-b4f0-825fd5a5650d"
+version = "0.2.0"
+
+[[Wayland_jll]]
+deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg", "XML2_jll"]
+git-tree-sha1 = "ed8d92d9774b077c53e1da50fd81a36af3744c1c"
+uuid = "a2964d1f-97da-50d4-b82a-358c7fce9d89"
+version = "1.21.0+0"
+
+[[Wayland_protocols_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "4528479aa01ee1b3b4cd0e6faef0e04cf16466da"
+uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
+version = "1.25.0+0"
 
 [[WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1943,6 +2311,12 @@ git-tree-sha1 = "4e490d5c960c314f33885790ed410ff3a94ce67e"
 uuid = "0c0b7dd1-d40b-584c-a123-a41640f87eec"
 version = "1.0.9+4"
 
+[[Xorg_libXcursor_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXfixes_jll", "Xorg_libXrender_jll"]
+git-tree-sha1 = "12e0eb3bc634fa2080c1c37fccf56f7c22989afd"
+uuid = "935fb764-8cf2-53bf-bb30-45bb1f8bf724"
+version = "1.2.0+4"
+
 [[Xorg_libXdmcp_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "4fe47bd2247248125c428978740e18a681372dd4"
@@ -1954,6 +2328,30 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
 git-tree-sha1 = "b7c0aa8c376b31e4852b360222848637f481f8c3"
 uuid = "1082639a-0dae-5f34-9b06-72781eeb8cb3"
 version = "1.3.4+4"
+
+[[Xorg_libXfixes_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
+git-tree-sha1 = "0e0dc7431e7a0587559f9294aeec269471c991a4"
+uuid = "d091e8ba-531a-589c-9de9-94069b037ed8"
+version = "5.0.3+4"
+
+[[Xorg_libXi_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXext_jll", "Xorg_libXfixes_jll"]
+git-tree-sha1 = "89b52bc2160aadc84d707093930ef0bffa641246"
+uuid = "a51aa0fd-4e3c-5386-b890-e753decda492"
+version = "1.7.10+4"
+
+[[Xorg_libXinerama_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXext_jll"]
+git-tree-sha1 = "26be8b1c342929259317d8b9f7b53bf2bb73b123"
+uuid = "d1454406-59df-5ea1-beac-c340f2130bc3"
+version = "1.1.4+4"
+
+[[Xorg_libXrandr_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll"]
+git-tree-sha1 = "34cea83cb726fb58f325887bf0612c6b3fb17631"
+uuid = "ec84b674-ba8e-5d96-8ba1-2a689ba10484"
+version = "1.5.2+4"
 
 [[Xorg_libXrender_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
@@ -1973,6 +2371,54 @@ git-tree-sha1 = "daf17f441228e7a3833846cd048892861cff16d6"
 uuid = "c7cfdc94-dc32-55de-ac96-5a1b8d977c5b"
 version = "1.13.0+3"
 
+[[Xorg_libxkbfile_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
+git-tree-sha1 = "926af861744212db0eb001d9e40b5d16292080b2"
+uuid = "cc61e674-0454-545c-8b26-ed2c68acab7a"
+version = "1.1.0+4"
+
+[[Xorg_xcb_util_image_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_xcb_util_jll"]
+git-tree-sha1 = "0fab0a40349ba1cba2c1da699243396ff8e94b97"
+uuid = "12413925-8142-5f55-bb0e-6d7ca50bb09b"
+version = "0.4.0+1"
+
+[[Xorg_xcb_util_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libxcb_jll"]
+git-tree-sha1 = "e7fd7b2881fa2eaa72717420894d3938177862d1"
+uuid = "2def613f-5ad1-5310-b15b-b15d46f528f5"
+version = "0.4.0+1"
+
+[[Xorg_xcb_util_keysyms_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_xcb_util_jll"]
+git-tree-sha1 = "d1151e2c45a544f32441a567d1690e701ec89b00"
+uuid = "975044d2-76e6-5fbe-bf08-97ce7c6574c7"
+version = "0.4.0+1"
+
+[[Xorg_xcb_util_renderutil_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_xcb_util_jll"]
+git-tree-sha1 = "dfd7a8f38d4613b6a575253b3174dd991ca6183e"
+uuid = "0d47668e-0667-5a69-a72c-f761630bfb7e"
+version = "0.3.9+1"
+
+[[Xorg_xcb_util_wm_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_xcb_util_jll"]
+git-tree-sha1 = "e78d10aab01a4a154142c5006ed44fd9e8e31b67"
+uuid = "c22f9ab0-d5fe-5066-847c-f4bb1cd4e361"
+version = "0.4.1+1"
+
+[[Xorg_xkbcomp_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libxkbfile_jll"]
+git-tree-sha1 = "4bcbf660f6c2e714f87e960a171b119d06ee163b"
+uuid = "35661453-b289-5fab-8a00-3d9160c6a3a4"
+version = "1.4.2+4"
+
+[[Xorg_xkeyboard_config_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_xkbcomp_jll"]
+git-tree-sha1 = "5c8424f8a67c3f2209646d4425f3d415fee5931d"
+uuid = "33bec58e-1273-512f-9401-5d533626f822"
+version = "2.27.0+4"
+
 [[Xorg_xtrans_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "79c31e7844f6ecf779705fbc12146eb190b7d845"
@@ -1983,6 +2429,18 @@ version = "1.4.0+3"
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
 version = "1.2.12+3"
+
+[[Zstd_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "49ce682769cd5de6c72dcf1b94ed7790cd08974c"
+uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
+version = "1.5.5+0"
+
+[[fzf_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "868e669ccb12ba16eaf50cb2957ee2ff61261c56"
+uuid = "214eeab7-80f7-51ab-84ad-2988db7cef09"
+version = "0.29.0+0"
 
 [[isoband_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2046,6 +2504,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "ee567a171cce03570d77ad3a43e90218e38937a9"
 uuid = "dfaa095f-4041-5dcd-9319-2fabd8486b76"
 version = "3.5.0+0"
+
+[[xkbcommon_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Wayland_jll", "Wayland_protocols_jll", "Xorg_libxcb_jll", "Xorg_xkeyboard_config_jll"]
+git-tree-sha1 = "9ebfc140cc56e8c2156a15ceac2f0302e327ac0a"
+uuid = "d8fb68d0-12a3-5cfd-a85a-d49703b185fd"
+version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
@@ -2053,16 +2517,19 @@ version = "3.5.0+0"
 # ╠═9cb64897-e862-444b-8435-54a90fc8690c
 # ╠═f03578ab-8ab0-4564-b7e3-6c368b61eb5a
 # ╠═668bb938-f4e3-473c-aced-599a759ba645
+# ╠═a4aae317-549d-439b-9bc2-f378e1ef5834
 # ╠═bf268a10-ac94-452a-8436-834e7befa111
-# ╠═3f814e35-543b-47e6-9b05-c4409de5d02e
+# ╟─3f814e35-543b-47e6-9b05-c4409de5d02e
 # ╠═5c9f12a6-01a8-4a85-a8b4-93cad94bff2a
-# ╠═cf5d17bc-900a-4420-a863-dbbf8b64d54a
+# ╠═f0331894-62dc-48fb-825f-cbc7704bf4d0
+# ╠═16f9ddbf-7615-479a-a65e-2c50e1d5dcde
+# ╟─cf5d17bc-900a-4420-a863-dbbf8b64d54a
 # ╠═b94e4c8c-5335-4e99-b92a-28d5a5b00b1b
 # ╠═1f1d6b11-6d87-4ff2-81c7-0f2ba2ceffec
 # ╠═23d7831b-233e-457b-839c-81955bd824a7
 # ╠═d661c668-fa91-4964-8817-22cdba31c38b
 # ╠═5428328c-f34f-4221-a16d-bc343eff8a4b
-# ╠═59fae562-b2a9-4926-89d2-10f94b936fb8
+# ╟─59fae562-b2a9-4926-89d2-10f94b936fb8
 # ╟─3a0450e1-7009-4494-a8f2-514409a36727
 # ╟─2aa49e8a-0323-491d-a802-64ecbed69a70
 # ╠═81732f05-ea97-402e-8f4c-365814fd4280
@@ -2087,7 +2554,6 @@ version = "3.5.0+0"
 # ╟─03a047d1-d48b-4558-b433-3f7cc8031e5a
 # ╠═d4866da1-2128-4968-a72b-022cdd879516
 # ╠═eb092e0b-ee95-47df-904d-4ee34ce05943
-# ╠═68f84e2f-4f1f-46c0-b4f1-6dce72d6b711
 # ╠═4941ab5c-c9f7-4de0-9711-c81927a52f68
 # ╠═d900a7d0-a07f-4dda-a98f-b8850780ff49
 # ╟─5ca84557-316a-47bd-897b-3deacdccface
