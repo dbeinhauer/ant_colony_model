@@ -14,11 +14,10 @@ end
 # ╔═╡ 78142762-ae33-11ed-3e6b-75b2fc3af2b5
 module AntsModel
 
-import Pkg
-Pkg.add("Plots")
-
-include("ant_colony.jl")
-# 
+	import Pkg
+	Pkg.add("Plots")
+	
+	include("ant_colony.jl")
 end
 
 # ╔═╡ 9cb64897-e862-444b-8435-54a90fc8690c
@@ -43,168 +42,115 @@ function compute_num_food(
 	return total_food
 end
 
-# ╔═╡ f03578ab-8ab0-4564-b7e3-6c368b61eb5a
+# ╔═╡ 7673c798-7a6a-4ed4-b549-bffd1294a174
+md"""
+__Collection of map variants.__
 """
-	draw_map(simulation_map, ants, title)
-
-Draw the map.
-"""
-function draw_map(
-		simulation_map, 
-		ants;
-		title::String = ""
-	)
-
-	map_objects_colors = Dict(
-		AntsModel.OBSTACLE => AntsModel.hex2rgba(0xFF00F0),
-		AntsModel.FREE => AntsModel.hex2rgba(0x000000),
-		AntsModel.NEST => AntsModel.hex2rgba(0xFF4500),
-		AntsModel.FOOD => AntsModel.hex2rgba(0x7A871E),
-		AntsModel.TRAP => AntsModel.hex2rgba(0x159874)
-	)
-
-	return AntsModel.Plots.plot(
-		map(s -> map_objects_colors[s], transpose(simulation_map.map_objects))
-	)
-end
-
-# ╔═╡ a4aae317-549d-439b-9bc2-f378e1ef5834
-begin
-# Generate example data
-data1 = rand(10, 10)  # First heatmap data
-data2 = rand(10, 10)  # Second heatmap data
-
-# Create figure
-fig = Figure()
-
-# Plot the first heatmap with transparency
-heatmap(fig[1, 1], data1, colormap=:viridis, alpha=0.5)
-
-# Plot the second heatmap with transparency
-heatmap!(fig[1, 1], data2, colormap=:inferno, alpha=0.5)
-
-# Add colorbar
-# colorbar!(fig[1, 1], label="Value")
-
-# Show the plot
-# display(fig)
-fig
-end
 
 # ╔═╡ bf268a10-ac94-452a-8436-834e7befa111
-function draw_map_makie(
-		simulation_map, 
-		ants,
+"""
+	draw_map(simulation_map, axs; <keyword arguments>)
+
+Draw to the `axs` either map layout or pheromone levels of `simulation_map`.
+
+# Arguments:
+- `simulation_map::AntsModel.Map`
+- `axs`
+- `title::String=""`,
+- `draw_pher=false`
+
+"""
+function draw_map(
+		simulation_map::AntsModel.Map, 
 		axs;
 		title::String = "",
 		draw_pher=false,
-		fig=nothing
 	)
 
-	map_objects_colors = Dict(
-		AntsModel.OBSTACLE => AntsModel.hex2rgba(0xFF00F0),
-		AntsModel.FREE => AntsModel.hex2rgba(0x000000),
-		AntsModel.NEST => AntsModel.hex2rgba(0xFF4500),
-		AntsModel.FOOD => AntsModel.hex2rgba(0x7A871E),
-		AntsModel.TRAP => AntsModel.hex2rgba(0x159874)
-	)
-
-	FOOD_PHER_COLOR = (250, 0, 0)
-	NEST_PHER_COLOR = (0, 250, 0)
-
-	set_color(rgb, alpha) = AntsModel.Plots.RGBA(rgb[1], rgb[2], rgb[3], alpha)
-	
-		# Sets color based on the pheromones concentrations. 
-	set_pheromone_color(food_pheromone, nest_pheromone) =
-		(set_color(FOOD_PHER_COLOR .* food_pheromone .+ 
-				NEST_PHER_COLOR .* nest_pheromone, 
-			#max(food_pheromone, nest_pheromone)^color_normalization
-			((food_pheromone + nest_pheromone) / 2)^1
-			)
-		)
-		
-	# Function to determine color of the pixel based on the map object and pheromones.
-	color_map_objects_pheromones(object, food_pheromone, nest_pheromone) = 
-		(food_pheromone == 0 && nest_pheromone == 0 ) ||
-		(object != AntsModel.FREE) ?
-			map_objects_colors[object] : 
-			set_pheromone_color(food_pheromone, nest_pheromone)
-
+	# Trick to get the correct orientation of the map.
 	axs.yreversed = true
 
-	hidedecorations!(axs)  # hides ticks, grid and lables
+	# Hide ticks, grid and lables.
+	hidedecorations!(axs)
 	hidespines!(axs) 
 
-	if !draw_pher
+	if draw_pher
+		# Draw pheromones.
+
+		# Colormap (yellow-red-black-green-yellow). 
+		# For easier representation of different pheromone level ratios.
+		mycmap = ColorScheme(
+			[
+				# Yellow (value -2)
+				AntsModel.hex2rgba(0xFFFF00),
+				# Red (value -1)
+				AntsModel.hex2rgba(0xFF0000),
+				# Black (value 0)
+				AntsModel.hex2rgba(0x000000),
+				# Green (value 1)
+				AntsModel.hex2rgba(0x00FF00),
+				# Yellow (value 2)
+				AntsModel.hex2rgba(0xFFFF00),
+			]
+		)
+
+		# The sign of the pheromone level is determined by the greather 
+		# value of pheromone level (food - negative, nest - positive).
+		# The absolute value of the resulting level is the sum of the levels. 
+		pheromone_levels = 
+			sign.(simulation_map.nest_pheromones .- simulation_map.food_pheromones).* 
+			(simulation_map.nest_pheromones .+ simulation_map.food_pheromones)
+	
+		return heatmap!(
+			axs, 
+			pheromone_levels,
+			colorrange = (-2, 2),
+			colormap = cgrad(mycmap, 2),
+		)
+
+	else
+		# Draw map layout
+		
+		map_objects_colors = Dict(
+			AntsModel.OBSTACLE => AntsModel.hex2rgba(0xFF00F0),
+			AntsModel.FREE => AntsModel.hex2rgba(0x000000),
+			AntsModel.NEST => AntsModel.hex2rgba(0xFF4500),
+			AntsModel.FOOD => AntsModel.hex2rgba(0x7A871E),
+			AntsModel.TRAP => AntsModel.hex2rgba(0x159874)
+		)
+
 		unique_values = sort(unique(simulation_map.map_objects))
 
 		mycmap = ColorScheme([map_objects_colors[x] for x in unique_values])
-		return heatmap!(axs, 
+		return heatmap!(
+			axs, 
 			simulation_map.map_objects,
-			colormap=cgrad(mycmap, size(unique_values)[1], categorical=true, )#rev=true),
+			colormap = cgrad(
+					mycmap,
+					size(unique_values)[1],
+					categorical=true,
+				),
+			highclip = nothing,
+			lowclip = nothing,
 		)
 	end
-
-
-	mycmap = ColorScheme(
-		[
-			AntsModel.hex2rgba(0xFFFF00),
-			AntsModel.hex2rgba(0xFF0000),
-			AntsModel.hex2rgba(0x000000),
-			AntsModel.hex2rgba(0x00FF00),
-			AntsModel.hex2rgba(0xFFFF00),
-		]
-	)
-	
-	# # Create a heatmap plot for the simulation map
-	# return heatmap!(axs, 
-	# 		map(color_map_objects_pheromones(simulation_map.map_objects, simulation_map.food_pheromones, simulation_map.nest_pheromones)),
-	# 		# map(set_pheromone_color, 
-	# 		# 	simulation_map.food_pheromones, simulation_map.nest_pheromones),
-	# 		# map(s -> map_objects_colors[s], simulation_map.map_objects), 
-	# 		# colorrange=AntsModel.hex2rgba(0x000000), 
-	# 		colorrange=(-1, 1),
-	# 		colormap=cgrad(mycmap, 2)
-	# )
-
-
-	heatmap_plot = heatmap!(axs, 
-			sign.(simulation_map.nest_pheromones .- simulation_map.food_pheromones).* (simulation_map.nest_pheromones .+ simulation_map.food_pheromones),
-			colorrange=(-2, 2),
-			colormap=cgrad(mycmap, 2),
-			alpha=0.5
-	)
-	
-	# pixel_x = 5
-	# pixel_y = 3
-	
-	# # Define a new RGBA color for the pixel
-	# new_color = RGBA(1.0, 0.0, 0.0, 1.0)  # Red color with full opacity
-
-	# unique_values = sort(unique(simulation_map.map_objects))
-
-	# mycmap = ColorScheme([map_objects_colors[x] for x in unique_values])
-	# return heatmap!(fig, 
-	# 	simulation_map.map_objects,
-	# 	colormap=cgrad(mycmap, size(unique_values)[1], categorical=true,),
-	# 	alpha=0.5#ev=true),
-	# )
-
-	# print(heatmap_plot)
-	
-	# # Update the color of the specific pixel in the heatmap
-	# heatmap_plot[1].olorrange = new_color   # Update the colorrange of the heatmap plot
-	# heatmap_plot[1].colormap = :grays        # Use a grayscale colormap
-	# heatmap_plot[1].data[pixel_x, pixel_y] = 1
-
-	return heatmap_plot
-
-	# return heatmap!(axs, 
-	# 		(simulation_map.nest_pheromones .- simulation_map.food_pheromones).* (simulation_map.nest_pheromones .+ simulation_map.food_pheromones),
-	# 		colorrange=(-2, 2),
-	# 		colormap=cgrad(mycmap, 2)
-	# )
 end
+
+# ╔═╡ 02ebd0c2-448d-4b7c-b386-08dc36b6da54
+# draw_maze_variants(;
+# 	draw_pheromone = true,
+# 	title = "Hladina feromonu za 1000 iterací modelu",
+# 	num_iterations = 1000,
+# 	# filename = "template1/images/pheromone_levels_1000.pdf",
+# )
+
+# ╔═╡ 3ff1c522-ab51-4c2a-8d5e-06b376e242cd
+# draw_maze_variants(;
+# 	draw_pheromone = true,
+# 	title = "Hladina feromonu za 4000 iterací modelu",
+# 	num_iterations = 4000,
+# 	# filename = "template1/images/pheromone_levels_4000.pdf",
+# )
 
 # ╔═╡ cf5d17bc-900a-4420-a863-dbbf8b64d54a
 # begin
@@ -599,35 +545,34 @@ begin
 			(1:60, 65:65), (60:60, 65:100),
 			(75:75, 25:75),
 			(75:100, 25:25), (75:100, 75:75)
-
 		]
 end
 
 # ╔═╡ 4125fd48-1b77-4f32-a5ed-79a59797edba
-begin
-	"""
-	Animated variant with map defined by `VARIANT_2` variables.
-	"""
+# begin
+# 	"""
+# 	Animated variant with map defined by `VARIANT_2` variables.
+# 	"""
 	
-	AntsModel.sim!(
-			AntsModel.init_simulation(
-				food_coordinates = FOOD_VARIANT_2,
-				nest_coordinates = NEST_VARIANT_2,
-				obstacle_coordinates = OBSTACLE_VARIANT_2,
-				# num_ants = 400,
-				# search_depth = 10,
-				pheromone_fade_rate = 0.00021,
-				search_depth = 10,
-				pheromone_power = 0.02,
-				difusion_rate = 0.495,
-				normalization_parameter = 0.0005,
-			)..., 
-			num_iterations = 4000, 
-			# animation_type = AntsModel.PHEROMONE_ANIM,
-			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-			animate = true,
-		)
-end
+# 	AntsModel.sim!(
+# 			AntsModel.init_simulation(
+# 				food_coordinates = FOOD_VARIANT_2,
+# 				nest_coordinates = NEST_VARIANT_2,
+# 				obstacle_coordinates = OBSTACLE_VARIANT_2,
+# 				# num_ants = 400,
+# 				# search_depth = 10,
+# 				pheromone_fade_rate = 0.00021,
+# 				search_depth = 10,
+# 				pheromone_power = 0.02,
+# 				difusion_rate = 0.495,
+# 				normalization_parameter = 0.0005,
+# 			)..., 
+# 			num_iterations = 4000, 
+# 			# animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+# 			animate = true,
+# 		)
+# end
 
 # ╔═╡ 0223727a-0dd0-4f27-9ecd-d67ff4169f53
 # begin
@@ -746,30 +691,30 @@ begin
 end
 
 # ╔═╡ 4dd90806-ff62-49dc-be11-16cf4e81975a
-begin
-	"""
-	Animated variant with map defined by `VARIANT_4` variables.
-	"""
+# begin
+# 	"""
+# 	Animated variant with map defined by `VARIANT_4` variables.
+# 	"""
 	
-	AntsModel.sim!(
-			AntsModel.init_simulation(
-				food_coordinates = FOOD_VARIANT_4,
-				nest_coordinates = NEST_VARIANT_4,
-				obstacle_coordinates = OBSTACLE_VARIANT_4,
-				# num_ants = 400,
-				# search_depth = 10,
-				pheromone_fade_rate = 0.00021,
-				search_depth = 10,
-				pheromone_power = 0.02,
-				difusion_rate = 0.495,
-				normalization_parameter = 0.0005,
-			)..., 
-			num_iterations = 4000, 
-			# animation_type = AntsModel.PHEROMONE_ANIM,
-			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-			animate = true,
-		)
-end
+# 	AntsModel.sim!(
+# 			AntsModel.init_simulation(
+# 				food_coordinates = FOOD_VARIANT_4,
+# 				nest_coordinates = NEST_VARIANT_4,
+# 				obstacle_coordinates = OBSTACLE_VARIANT_4,
+# 				# num_ants = 400,
+# 				# search_depth = 10,
+# 				pheromone_fade_rate = 0.00021,
+# 				search_depth = 10,
+# 				pheromone_power = 0.02,
+# 				difusion_rate = 0.495,
+# 				normalization_parameter = 0.0005,
+# 			)..., 
+# 			num_iterations = 4000, 
+# 			# animation_type = AntsModel.PHEROMONE_ANIM,
+# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
+# 			animate = true,
+# 		)
+# end
 
 # ╔═╡ ea4d58f4-4945-4883-a44a-3dbb19824193
 # begin
@@ -815,11 +760,8 @@ begin
 		]
 end
 
-# ╔═╡ 3f814e35-543b-47e6-9b05-c4409de5d02e
-function draw_maze_variants()
-    # Call the function for each variant and combine the plots
-	plot_array = []
-	
+# ╔═╡ 619d4516-f658-413c-adb2-72a88945acb8
+begin
 	food_variants = [
 		DEFAULT_FOOD_COORDINATES,
 		FOOD_VARIANT_1,
@@ -846,185 +788,157 @@ function draw_maze_variants()
 		OBSTACLE_VARIANT_4,
 		OBSTACLE_VARIANT_5,
 	]
+end
 
-	height = 2
-	width = 3
+# ╔═╡ 3f814e35-543b-47e6-9b05-c4409de5d02e
+"""
+	draw_maze_variants(<keyword arguments>)
 
-	# Makie
+Draw grid of maze variants (either layout or pheromone levels).
+
+# Arguments:
+- `draw_pheromone=false`
+- `title=""`
+- `num_iterations=10`
+- `filename=nothing`
+- `height=2`
+- `width=3`
+"""
+function draw_maze_variants(;
+		draw_pheromone = false,
+		title = "",
+		num_iterations = 10,
+		filename = nothing,
+		height = 2,
+		width = 3,
+	)
+	
     letters = reshape(collect('a':'f'), (width, height))
-    fig = Figure(resolution=(600, 400), #font="CMU Serif",
-        #backgroundcolor=:snow2)
-	)
-    axs = [Axis(fig[j, i], aspect=DataAspect()) for i = 1:width, j = 1:height]
-	
-	hms = [draw_map_makie(AntsModel.init_simulation(
-						food_coordinates = food_variants[(j-1)*width + i],
-						nest_coordinates = nest_variants[(j-1)*width + i],
-						obstacle_coordinates = obstacle_variants[(j-1)*width + i]
-				)[1:2]...,
-				axs[i, j],
-				title = "Variant-$i") 
-		for i = 1:width, j = 1:height
-	]
-
-	cbar = Colorbar(fig[1:2, 4], hms[2], label = "Objekty na mapě", height=Relative(3/4))
-
-	
-	cbar.ticks = (
-		[-0.66, 0.11, 0.88, 1.55], 
-		["Překážka", "Volno", "Hnízdo","Potrava"]
+    fig = Figure(
+		resolution=(600, 400),
 	)
 
+	axs = [Axis(fig[j, i], aspect=DataAspect()) for i = 1:width, j = 1:height]
 
-	label = Label(
+	# Function to determine correct map variant from the row coordinate `j` 
+	# and column coordinate `i`.
+	get_variant_index(i, j) = (j-1)*width + i
+
+
+	# Array of map representations.
+	hms = []
+	if draw_pheromone
+		# Draw pheromones after `num_iterations`.
+		for i = 1:width
+			for j = 1:height
+				variant_index = get_variant_index(i, j)
+				# Simulate each model and create heatmap of pheromones.
+				sim_model = AntsModel.init_simulation(
+						food_coordinates = food_variants[variant_index],
+						nest_coordinates = nest_variants[variant_index],
+						obstacle_coordinates = obstacle_variants[variant_index],
+					)
+				
+				AntsModel.sim!(
+					sim_model..., 
+					num_iterations = num_iterations,
+					animate=false,
+				)
+				
+				push!(hms, 
+					draw_map(
+						sim_model[1],
+						axs[i, j];
+						draw_pher = true,
+					)
+				)
+			end
+		end
+
+		# Proper grid shape.
+		hms = reshape(hms, (width, height))
+
+		# Add colorbar.
+		cbar = Colorbar(
+			fig[1:2, 4],
+			hms[2],
+			label = "Hladina feromonu",
+			height=Relative(1)
+		)
+		
+	else
+		# Draw map layout.
+
+		# Draw map layout for each map variant.
+		hms = [draw_map(
+					AntsModel.init_simulation(
+						food_coordinates = food_variants[get_variant_index(i, j)],
+						nest_coordinates = nest_variants[get_variant_index(i, j)],
+						obstacle_coordinates = obstacle_variants[
+								get_variant_index(i, j)
+							],
+					)[1],
+					axs[i, j],
+				)
+			for i = 1:width, j = 1:height
+		]
+
+		# Create legend of the map in form of the colorbar.
+		cbar = Colorbar(
+			fig[1:2, 4],
+			hms[2],
+			label = "Objekty na mapě",
+			height=Relative(1/2)
+		)
+
+		# Labels of each color in the map.
+		cbar.ticks = (
+			[-0.66, 0.11, 0.88, 1.55], 
+			["Překážka", "Volno", "Hnízdo","Potrava"]
+		)
+	end
+
+
+	# Set main title of the figure.
+	main_title = Label(
 			fig[1:2, 1:4, Top()],
-			"Varianty prostředí modelu",
+			title,
+			fontsize=25,
 	        padding=(0, 0, 30, 0),
 		)
 
-	new_fontsize = 25
-	label.textsize = new_fontsize
-	
+	# Set labels for each of the map variant
 	[Label(
 		fig[j, i, Top()], 
 		"($(letters[i, j])) var-$((j-1)*width + i - 1)",
-		fontsize=10,
 		padding=(0, 0, 0, 0),
-		# halign=:center,
 		valign=:bottom,
 		) for i = 1:width, j = 1:height
 	]
+	
+	if !isnothing(filename)
+		# Save the figure.
+		save(filename, fig)
+	else
+		# Draw the figure.
+	    fig
+	end
 
-    colgap!(fig.layout, 10)
-    rowgap!(fig.layout, 0)
-
-    fig
-
-	# save("template1/images/variants_new.pdf", fig)
 end
 
 # ╔═╡ 5c9f12a6-01a8-4a85-a8b4-93cad94bff2a
-draw_maze_variants()
-
-# ╔═╡ f0331894-62dc-48fb-825f-cbc7704bf4d0
-function draw_pheromones()
-	plot_array = []
-	
-	food_variants = [
-		DEFAULT_FOOD_COORDINATES,
-		FOOD_VARIANT_1,
-		FOOD_VARIANT_2,
-		FOOD_VARIANT_3,
-		FOOD_VARIANT_4,
-		FOOD_VARIANT_5,
-	]
-	
-	nest_variants = [
-		DEFAULT_NEST_COORDINATES,
-		NEST_VARIANT_1,
-		NEST_VARIANT_2,
-		NEST_VARIANT_3,
-		NEST_VARIANT_4,
-		NEST_VARIANT_5,
-	]
-	
-	obstacle_variants = [
-		DEFAULT_OBSTACLE_COORDINATES,
-		OBSTACLE_VARIANT_1,
-		OBSTACLE_VARIANT_2,
-		OBSTACLE_VARIANT_3,
-		OBSTACLE_VARIANT_4,
-		OBSTACLE_VARIANT_5,
-	]
-
-	height = 2
-	width = 3
-	# height = 1
-	# width = 1
-
-	# Makie
-    # letters = reshape(collect('a':'f'), (width, height))
-    fig = Figure(resolution=(600, 400), #font="CMU Serif",
-        #backgroundcolor=:snow2)
+draw_maze_variants(;
+	title = "Varianty prostředí modelu",
+	# filename = "template1/images/maze_variants.pdf",
 	)
-    axs = [Axis(fig[j, i], aspect=DataAspect()) for i = 1:width, j = 1:height]
 
-	hms = []
-	for i = 1:width
-		for j = 1:height
-			sim_model = AntsModel.init_simulation(
-					food_coordinates = food_variants[(j-1)*width + i],
-					nest_coordinates = nest_variants[(j-1)*width + i],
-					obstacle_coordinates = obstacle_variants[(j-1)*width + i]
-				)
-			AntsModel.sim!(
-				sim_model..., 
-				num_iterations=1000,
-				animate=false,
-			)
-			push!(hms, 
-				draw_map_makie(
-					sim_model[1:2]...,
-					axs[i, j];
-					title = "Variant-$i",
-					draw_pher = true,
-					fig = fig[i, j]
-				)
-			)
-		end
-	end
-
-	hms = reshape(hms, (width, height))
-	
-	# hms = [draw_map_makie(AntsModel.init_simulation(
-	# 					food_coordinates = food_variants[(j-1)*width + i],
-	# 					nest_coordinates = nest_variants[(j-1)*width + i],
-	# 					obstacle_coordinates = obstacle_variants[(j-1)*width + i]
-	# 			)[1:2]...,
-	# 			axs[i, j];
-	# 			title = "Variant-$i",
-	# 			draw_pher = true,
-	# 			) 
-	# 	for i = 1:width, j = 1:height
-	# ]
-
-	cbar = Colorbar(fig[1:2, 4], hms[2], label = "Objekty na mapě", height=Relative(3/4))
-
-	
-	# cbar.ticks = (
-	# 	[-0.66, 0.11, 0.88, 1.55], 
-	# 	["Překážka", "Volno", "Hnízdo","Potrava"]
-	# )
-
-
-	# label = Label(
-	# 		fig[1:2, 1:4, Top()],
-	# 		"Varianty prostředí modelu",
-	#         padding=(0, 0, 30, 0),
-	# 	)
-
-	# new_fontsize = 25
-	# label.textsize = new_fontsize
-	
-	# [Label(
-	# 	fig[j, i, Top()], 
-	# 	"($(letters[i, j])) var-$((j-1)*width + i - 1)",
-	# 	fontsize=10,
-	# 	padding=(0, 0, 0, 0),
-	# 	# halign=:center,
-	# 	valign=:bottom,
-	# 	) for i = 1:width, j = 1:height
-	# ]
-
-    colgap!(fig.layout, 10)
-    rowgap!(fig.layout, 0)
-
-    fig
-
-end
-
-# ╔═╡ 16f9ddbf-7615-479a-a65e-2c50e1d5dcde
-draw_pheromones()
+# ╔═╡ 889b40f6-eeb3-4284-a145-36b3f9c52324
+draw_maze_variants(;
+	draw_pheromone = true,
+	title = "Hladina feromonu za 300 iterací modelu",
+	num_iterations = 300,
+	# filename = "template1/images/pheromone_levels_300.pdf",
+)
 
 # ╔═╡ 6732a55d-2ae3-43d2-b229-a404d8a54a15
 # begin
@@ -1078,41 +992,6 @@ draw_pheromones()
 # 	)
 # end
 
-# ╔═╡ 2fbedeb7-9e2b-4a83-9008-206c542b7f92
-begin
-	FOOD_VARIANT_6 = [(10:20, 80:90), (50:60, 10:20)]
-	NEST_VARIANT_6 = [(5:10, 5:10), (90:95, 90:95)]
-	OBSTACLE_VARIANT_6 = [
-			(20:20, 5:25)
-		]
-end
-
-# ╔═╡ ab709e50-3caf-44ca-81ec-49b48f7dff3c
-# begin
-# 	"""
-# 	Animated variant with map defined by `VARIANT_6` variables.
-# 	"""
-	
-# 	AntsModel.sim!(
-# 			AntsModel.init_simulation(
-# 				food_coordinates = FOOD_VARIANT_6,
-# 				nest_coordinates = NEST_VARIANT_6,
-# 				obstacle_coordinates = OBSTACLE_VARIANT_6,
-# 				# num_ants = 400,
-# 				# search_depth = 10,
-# 				pheromone_fade_rate = 0.00021,
-# 				search_depth = 10,
-# 				pheromone_power = 0.02,
-# 				difusion_rate = 0.495,
-# 				normalization_parameter = 0.0005,
-# 			)..., 
-# 			num_iterations = 4000, 
-# 			# animation_type = AntsModel.PHEROMONE_ANIM,
-# 			animation_type = AntsModel.PHEROMONE_ANTS_ANIM,
-# 			animate = true,
-# 		)
-# end
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -1124,10 +1003,10 @@ Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
-CairoMakie = "~0.6.3"
+CairoMakie = "~0.10.4"
 ColorSchemes = "~3.20.0"
 Colors = "~0.12.10"
-Makie = "~0.15.0"
+Makie = "~0.19.4"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -1141,9 +1020,9 @@ uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "1.3.1"
 
 [[AbstractTrees]]
-git-tree-sha1 = "03e0550477d86222521d254b741d470ba17ea0b5"
+git-tree-sha1 = "faa260e4cb5aba097a73fab382dd4b5819d8ec8c"
 uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
-version = "0.3.4"
+version = "0.4.4"
 
 [[Adapt]]
 deps = ["LinearAlgebra", "Requires"]
@@ -1160,12 +1039,6 @@ version = "0.4.1"
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 version = "1.1.1"
-
-[[ArrayInterface]]
-deps = ["Adapt", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "38911c7737e123b28182d89027f4216cfc8a9da7"
-uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.4.3"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -1207,6 +1080,9 @@ git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.2"
 
+[[CRC32c]]
+uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
+
 [[Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
 git-tree-sha1 = "d0b3f8b4ad16cb0a2988c6788646a5e6a17b6b1b"
@@ -1214,16 +1090,22 @@ uuid = "159f3aea-2a34-519c-b102-8c37f9878175"
 version = "1.0.5"
 
 [[CairoMakie]]
-deps = ["Base64", "Cairo", "Colors", "FFTW", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "SHA", "StaticArrays"]
-git-tree-sha1 = "7d37b0bd71e7f3397004b925927dfa8dd263439c"
+deps = ["Base64", "Cairo", "Colors", "FFTW", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "SHA", "SnoopPrecompile"]
+git-tree-sha1 = "2aba202861fd2b7603beb80496b6566491229855"
 uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-version = "0.6.3"
+version = "0.10.4"
 
 [[Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
+
+[[Calculus]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "f641eb0a4f00c343bbc32346e1217b86f3ce9dad"
+uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+version = "0.5.1"
 
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
@@ -1284,11 +1166,16 @@ deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 version = "0.5.2+0"
 
+[[ConstructionBase]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "89a9db8d28102b094992472d333674bd1a83ce2a"
+uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+version = "1.5.1"
+
 [[Contour]]
-deps = ["StaticArrays"]
-git-tree-sha1 = "9f02045d934dc030edad45944ea80dbd1f0ebea7"
+git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
-version = "0.5.7"
+version = "0.6.2"
 
 [[DataAPI]]
 git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
@@ -1332,14 +1219,20 @@ version = "0.25.87"
 
 [[DocStringExtensions]]
 deps = ["LibGit2"]
-git-tree-sha1 = "b19534d1895d702889b219c382a6e18010797f0b"
+git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-version = "0.8.6"
+version = "0.9.3"
 
 [[Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 version = "1.6.0"
+
+[[DualNumbers]]
+deps = ["Calculus", "NaNMath", "SpecialFunctions"]
+git-tree-sha1 = "5837a837389fccf076445fce071c8ddaea35a566"
+uuid = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
+version = "0.6.8"
 
 [[EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1347,17 +1240,16 @@ git-tree-sha1 = "e3290f2d49e661fbd94046d7e3726ffcb2d41053"
 uuid = "5ae413db-bbd1-5e63-b57d-d24a61df00f5"
 version = "2.2.4+0"
 
-[[EllipsisNotation]]
-deps = ["StaticArrayInterface"]
-git-tree-sha1 = "d89f0d98f6296a08b73fdfed559f8e86f871cc06"
-uuid = "da5c29d0-fa7d-589e-88eb-ea29b0a81949"
-version = "1.7.0"
-
 [[Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "bad72f730e9e91c08d9427d5e8db95478a3c323d"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.4.8+0"
+
+[[Extents]]
+git-tree-sha1 = "5e1e4c53fa39afe63a7d356e30452249365fba99"
+uuid = "411431e0-e8b7-467b-b5e0-f676ba4f2910"
+version = "0.1.1"
 
 [[FFMPEG]]
 deps = ["FFMPEG_jll"]
@@ -1429,10 +1321,10 @@ uuid = "d7e528f0-a631-5988-bf34-fe36492bcfd7"
 version = "2.10.4+0"
 
 [[FreeTypeAbstraction]]
-deps = ["ColorVectorSpace", "Colors", "FreeType", "GeometryBasics", "StaticArrays"]
-git-tree-sha1 = "d51e69f0a2f8a3842bca4183b700cf3d9acce626"
+deps = ["ColorVectorSpace", "Colors", "FreeType", "GeometryBasics"]
+git-tree-sha1 = "38a92e40157100e796690421e34a11c107205c86"
 uuid = "663a7486-cb36-511b-a19d-713bb74d65c9"
-version = "0.9.1"
+version = "0.10.0"
 
 [[FriBidi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1440,11 +1332,21 @@ git-tree-sha1 = "aa31987c2ba8704e23c6c8ba8a4f769d5d7e4f91"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.10+0"
 
+[[Future]]
+deps = ["Random"]
+uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+
 [[GLFW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]
 git-tree-sha1 = "d972031d28c8c8d9d7b41a536ad7bb0c2579caca"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.3.8+0"
+
+[[GPUArraysCore]]
+deps = ["Adapt"]
+git-tree-sha1 = "1cd7f0af1aa58abc02ea1d872953a97359cb87fa"
+uuid = "46192b85-c4d5-4398-a991-12ede77f4527"
+version = "0.1.4"
 
 [[GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
@@ -1458,11 +1360,17 @@ git-tree-sha1 = "99e248f643b052a77d2766fe1a16fb32b661afd4"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
 version = "0.72.0+0"
 
+[[GeoInterface]]
+deps = ["Extents"]
+git-tree-sha1 = "0eb6de0b312688f852f347171aba888658e29f20"
+uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
+version = "1.3.0"
+
 [[GeometryBasics]]
-deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
-git-tree-sha1 = "4136b8a5668341e58398bb472754bff4ba0456ff"
+deps = ["EarCut_jll", "GeoInterface", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
+git-tree-sha1 = "303202358e38d2b01ba46844b92e48a3c238fd9e"
 uuid = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
-version = "0.3.12"
+version = "0.4.6"
 
 [[Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -1489,10 +1397,10 @@ uuid = "3b182d85-2403-5c21-9c21-1e1f0cc25472"
 version = "1.3.14+0"
 
 [[GridLayoutBase]]
-deps = ["GeometryBasics", "InteractiveUtils", "Match", "Observables"]
-git-tree-sha1 = "d44945bdc7a462fa68bb847759294669352bd0a4"
+deps = ["GeometryBasics", "InteractiveUtils", "Observables"]
+git-tree-sha1 = "678d136003ed5bceaab05cf64519e3f956ffa4ba"
 uuid = "3955a311-db13-416c-9275-1d80ed98e5e9"
-version = "0.5.7"
+version = "0.9.1"
 
 [[Grisu]]
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
@@ -1511,10 +1419,11 @@ git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "2.8.1+1"
 
-[[IfElse]]
-git-tree-sha1 = "debdd00ffef04665ccbb3e150747a77560e8fad1"
-uuid = "615f187c-cbe4-4ef1-ba3b-2fcf58d6d173"
-version = "0.1.1"
+[[HypergeometricFunctions]]
+deps = ["DualNumbers", "LinearAlgebra", "OpenLibm_jll", "SpecialFunctions"]
+git-tree-sha1 = "432b5b03176f8182bd6841fbfc42c718506a2d5f"
+uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
+version = "0.3.15"
 
 [[ImageAxes]]
 deps = ["AxisArrays", "ImageBase", "ImageCore", "Reexport", "SimpleTraits"]
@@ -1535,10 +1444,10 @@ uuid = "a09fc81d-aa75-5fe9-8630-4744c3626534"
 version = "0.9.4"
 
 [[ImageIO]]
-deps = ["FileIO", "Netpbm", "PNGFiles"]
-git-tree-sha1 = "0d6d09c28d67611c68e25af0c2df7269c82b73c7"
+deps = ["FileIO", "IndirectArrays", "JpegTurbo", "LazyModules", "Netpbm", "OpenEXR", "PNGFiles", "QOI", "Sixel", "TiffImages", "UUIDs"]
+git-tree-sha1 = "342f789fd041a55166764c351da1710db97ce0e0"
 uuid = "82e4d734-157c-48bb-816b-45c225c6df19"
-version = "0.4.1"
+version = "0.6.6"
 
 [[ImageMetadata]]
 deps = ["AxisArrays", "ImageAxes", "ImageBase", "ImageCore"]
@@ -1546,10 +1455,21 @@ git-tree-sha1 = "36cbaebed194b292590cba2593da27b34763804a"
 uuid = "bc367c6b-8a6b-528e-b4bd-a4b897500b49"
 version = "0.9.8"
 
+[[Imath_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "3d09a9f60edf77f8a4d99f9e015e8fbf9989605d"
+uuid = "905a6f67-0a94-5f89-b386-d35d92009cd1"
+version = "3.1.7+0"
+
 [[IndirectArrays]]
 git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
 uuid = "9b13fd28-a010-5f03-acff-a1bbcff69959"
 version = "1.0.0"
+
+[[Inflate]]
+git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
+uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
+version = "0.1.3"
 
 [[IniFile]]
 git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
@@ -1558,9 +1478,9 @@ version = "0.5.1"
 
 [[IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "d979e54b71da82f3a65b62553da4fc3d18c9004c"
+git-tree-sha1 = "0cb9352ef2e01574eeebdb102948a58740dcaf83"
 uuid = "1d5cc7b8-4909-519e-a0f8-d0f5ad9712d0"
-version = "2018.0.3+2"
+version = "2023.1.0+0"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -1573,10 +1493,10 @@ uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 version = "0.14.7"
 
 [[IntervalSets]]
-deps = ["Dates", "EllipsisNotation", "Statistics"]
-git-tree-sha1 = "bcf640979ee55b652f3b01650444eb7bbe3ea837"
+deps = ["Dates", "Random", "Statistics"]
+git-tree-sha1 = "16c0cc91853084cb5f58a78bd209513900206ce6"
 uuid = "8197267c-284f-5f27-9208-e0e47529a953"
-version = "0.5.4"
+version = "0.7.4"
 
 [[InverseFunctions]]
 deps = ["Test"]
@@ -1585,9 +1505,9 @@ uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
 
 [[IrrationalConstants]]
-git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
+git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
-version = "0.1.1"
+version = "0.2.2"
 
 [[Isoband]]
 deps = ["isoband_jll"]
@@ -1622,6 +1542,12 @@ deps = ["Dates", "Mmap", "Parsers", "Unicode"]
 git-tree-sha1 = "31e996f0a15c7b280ba9f76636b3ff9e2ae58c9a"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.4"
+
+[[JpegTurbo]]
+deps = ["CEnum", "FileIO", "ImageCore", "JpegTurbo_jll", "TOML"]
+git-tree-sha1 = "106b6aa272f294ba47e96bd3acbabdc0407b5c60"
+uuid = "b835a17e-a41a-41e7-81f0-2f016b05efe0"
+version = "0.1.2"
 
 [[JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1667,6 +1593,11 @@ version = "0.15.18"
 [[LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
 uuid = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
+
+[[LazyModules]]
+git-tree-sha1 = "a560dd966b386ac9ae60bdd3a3d3a326062d3c3e"
+uuid = "8cdb02fc-e678-4876-92c5-9defec4f444e"
+version = "0.3.1"
 
 [[LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -1770,16 +1701,16 @@ uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 version = "0.5.10"
 
 [[Makie]]
-deps = ["Animations", "Artifacts", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "Observables", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "Serialization", "Showoff", "SignedDistanceFields", "SparseArrays", "StaticArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "UnicodeFun"]
-git-tree-sha1 = "5761bfd21ad271efd7e134879e39a2289a032fc8"
+deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "Downloads", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "InteractiveUtils", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "MiniQhull", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Setfield", "Showoff", "SignedDistanceFields", "SnoopPrecompile", "SparseArrays", "StableHashTraits", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "TriplotBase", "UnicodeFun"]
+git-tree-sha1 = "74657542dc85c3b72b8a5a9392d57713d8b7a999"
 uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-version = "0.15.0"
+version = "0.19.4"
 
 [[MakieCore]]
 deps = ["Observables"]
-git-tree-sha1 = "7bcc8323fb37523a6a51ade2234eee27a11114c8"
+git-tree-sha1 = "9926529455a331ed73c19ff06d16906737a876ed"
 uuid = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
-version = "0.1.3"
+version = "0.6.3"
 
 [[MappedArrays]]
 git-tree-sha1 = "e8b359ef06ec72e8c030463fe02efe5527ee5142"
@@ -1796,10 +1727,10 @@ uuid = "7eb4fadd-790c-5f42-8a69-bfa0b872bfbf"
 version = "1.2.0"
 
 [[MathTeXEngine]]
-deps = ["AbstractTrees", "Automa", "DataStructures", "FreeTypeAbstraction", "GeometryBasics", "LaTeXStrings", "REPL", "Test"]
-git-tree-sha1 = "69b565c0ca7bf9dae18498b52431f854147ecbf3"
+deps = ["AbstractTrees", "Automa", "DataStructures", "FreeTypeAbstraction", "GeometryBasics", "LaTeXStrings", "REPL", "RelocatableFolders", "Test", "UnicodeFun"]
+git-tree-sha1 = "64890e1e8087b71c03bd6b8af99b49c805b2a78d"
 uuid = "0a4f8689-d25c-4efe-a92b-7142dfc1aa53"
-version = "0.1.2"
+version = "0.5.5"
 
 [[MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "MozillaCACerts_jll", "Random", "Sockets"]
@@ -1816,6 +1747,12 @@ version = "2.28.0+0"
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
 uuid = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 version = "0.3.2"
+
+[[MiniQhull]]
+deps = ["QhullMiniWrapper_jll"]
+git-tree-sha1 = "9dc837d180ee49eeb7c8b77bb1c860452634b0d1"
+uuid = "978d7f02-9e05-4691-894f-ae31a51d76ca"
+version = "0.4.0"
 
 [[Missings]]
 deps = ["DataAPI"]
@@ -1853,9 +1790,9 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.2.0"
 
 [[Observables]]
-git-tree-sha1 = "fe29afdef3d0c4a8286128d4e45cc50621b1e43d"
+git-tree-sha1 = "6862738f9796b3edc1c09d0890afce4eca9e7e93"
 uuid = "510215fc-4207-5dde-b226-833fc4488ee2"
-version = "0.4.0"
+version = "0.5.4"
 
 [[OffsetArrays]]
 deps = ["Adapt"]
@@ -1873,6 +1810,18 @@ version = "1.3.5+1"
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 version = "0.3.20+0"
+
+[[OpenEXR]]
+deps = ["Colors", "FileIO", "OpenEXR_jll"]
+git-tree-sha1 = "327f53360fdb54df7ecd01e96ef1983536d1e633"
+uuid = "52e1d378-f018-4a11-a4be-720524705ac7"
+version = "0.3.2"
+
+[[OpenEXR_jll]]
+deps = ["Artifacts", "Imath_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
+git-tree-sha1 = "a4ca623df1ae99d09bc9868b008262d0c0ac1e4f"
+uuid = "18a262bb-aa17-5467-a713-aee519bc75cb"
+version = "3.1.4+0"
 
 [[OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1927,9 +1876,9 @@ version = "0.3.17"
 
 [[Packing]]
 deps = ["GeometryBasics"]
-git-tree-sha1 = "f4049d379326c2c7aa875c702ad19346ecb2b004"
+git-tree-sha1 = "ec3edfe723df33528e085e632414499f26650501"
 uuid = "19eb6ba3-879d-56ad-ad62-d5c202156566"
-version = "0.4.1"
+version = "0.5.0"
 
 [[PaddedViews]]
 deps = ["OffsetArrays"]
@@ -1965,6 +1914,12 @@ deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markd
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.8.0"
 
+[[PkgVersion]]
+deps = ["Pkg"]
+git-tree-sha1 = "f6cf8e7944e50901594838951729a1861e668cb8"
+uuid = "eebad327-c553-4316-9ea0-9fa01ccd7688"
+version = "0.3.2"
+
 [[PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
 git-tree-sha1 = "1f03a2d339f42dca4a4da149c7e15e9b896ad899"
@@ -1997,6 +1952,30 @@ version = "1.3.0"
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[ProgressMeter]]
+deps = ["Distributed", "Printf"]
+git-tree-sha1 = "d7a7aef8f8f2d537104f170139553b14dfe39fe9"
+uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
+version = "1.7.2"
+
+[[QOI]]
+deps = ["ColorTypes", "FileIO", "FixedPointNumbers"]
+git-tree-sha1 = "18e8f4d1426e965c7b532ddd260599e1510d26ce"
+uuid = "4b34888f-f399-49d4-9bb3-47ed5cae4e65"
+version = "1.0.0"
+
+[[QhullMiniWrapper_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Qhull_jll"]
+git-tree-sha1 = "607cf73c03f8a9f83b36db0b86a3a9c14179621f"
+uuid = "460c41e3-6112-5d7f-b78c-b6823adb3f2d"
+version = "1.0.0+1"
+
+[[Qhull_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "238dd7e2cc577281976b9681702174850f8d4cbc"
+uuid = "784f63db-0788-585a-bace-daefebcd302b"
+version = "8.0.1001+0"
 
 [[Qt5Base_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "xkbcommon_jll"]
@@ -2095,6 +2074,12 @@ version = "1.2.0"
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
+[[Setfield]]
+deps = ["ConstructionBase", "Future", "MacroTools", "StaticArraysCore"]
+git-tree-sha1 = "e2cc6d8c88613c05e1defb55170bf5ff211fbeac"
+uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
+version = "1.1.1"
+
 [[SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
 uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
@@ -2122,6 +2107,12 @@ git-tree-sha1 = "5d7e3f4e11935503d3ecaf7186eac40602e7d231"
 uuid = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 version = "0.9.4"
 
+[[Sixel]]
+deps = ["Dates", "FileIO", "ImageCore", "IndirectArrays", "OffsetArrays", "REPL", "libsixel_jll"]
+git-tree-sha1 = "8fb59825be681d451c246a795117f317ecbcaa28"
+uuid = "45858cf5-a6b0-47a3-bbea-62219f50df47"
+version = "0.1.2"
+
 [[SnoopPrecompile]]
 deps = ["Preferences"]
 git-tree-sha1 = "e760a70afdcd461cf01a575947738d359234665c"
@@ -2147,29 +2138,23 @@ git-tree-sha1 = "ef28127915f4229c971eb43f3fc075dd3fe91880"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "2.2.0"
 
+[[StableHashTraits]]
+deps = ["CRC32c", "Compat", "Dates", "SHA", "Tables", "TupleTools", "UUIDs"]
+git-tree-sha1 = "0b8b801b8f03a329a4e86b44c5e8a7d7f4fe10a3"
+uuid = "c5dd0088-6c3f-4803-b00e-f31a60c170fa"
+version = "0.3.1"
+
 [[StackViews]]
 deps = ["OffsetArrays"]
 git-tree-sha1 = "46e589465204cd0c08b4bd97385e4fa79a0c770c"
 uuid = "cae243ae-269e-4f55-b966-ac2d0dc13c15"
 version = "0.1.1"
 
-[[Static]]
-deps = ["IfElse"]
-git-tree-sha1 = "08be5ee09a7632c32695d954a602df96a877bf0d"
-uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
-version = "0.8.6"
-
-[[StaticArrayInterface]]
-deps = ["ArrayInterface", "Compat", "IfElse", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "Static", "SuiteSparse"]
-git-tree-sha1 = "fd5f417fd7e103c121b0a0b4a6902f03991111f4"
-uuid = "0d7ed370-da01-4f52-bd93-41d350b8b718"
-version = "1.3.0"
-
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
-git-tree-sha1 = "70e0cc0c0f9ef7ea76b3d7a50ada18c8c52e69a2"
+git-tree-sha1 = "63e84b7fdf5021026d0f17f76af7c57772313d99"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.5.20"
+version = "1.5.21"
 
 [[StaticArraysCore]]
 git-tree-sha1 = "6b7ba252635a5eff6a0b0664a41ee140a1c9e72a"
@@ -2193,16 +2178,16 @@ uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.33.21"
 
 [[StatsFuns]]
-deps = ["ChainRulesCore", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
-git-tree-sha1 = "5950925ff997ed6fb3e985dcce8eb1ba42a0bbe7"
+deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
+git-tree-sha1 = "f625d686d5a88bcd2b15cd81f18f98186fdc0c9a"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "0.9.18"
+version = "1.3.0"
 
 [[StructArrays]]
-deps = ["Adapt", "DataAPI", "Tables"]
-git-tree-sha1 = "44b3afd37b17422a62aea25f04c1f7e09ce6b07f"
+deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]
+git-tree-sha1 = "521a0e828e98bb69042fec1809c1b5a680eb7389"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.5.1"
+version = "0.6.15"
 
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -2240,11 +2225,27 @@ version = "0.1.1"
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+[[TiffImages]]
+deps = ["ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "Mmap", "OffsetArrays", "PkgVersion", "ProgressMeter", "UUIDs"]
+git-tree-sha1 = "8621f5c499a8aa4aa970b1ae381aae0ef1576966"
+uuid = "731e570b-9d59-4bfa-96dc-6df516fadf69"
+version = "0.6.4"
+
 [[TranscodingStreams]]
 deps = ["Random", "Test"]
 git-tree-sha1 = "0b829474fed270a4b0ab07117dce9b9a2fa7581a"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.12"
+
+[[TriplotBase]]
+git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
+uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
+version = "0.1.0"
+
+[[TupleTools]]
+git-tree-sha1 = "3c712976c47707ff893cf6ba4354aa14db1d8938"
+uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+version = "1.3.0"
 
 [[URIs]]
 git-tree-sha1 = "074f993b0ca030848b897beff716d93aca60f06a"
@@ -2477,6 +2478,12 @@ git-tree-sha1 = "94d180a6d2b5e55e447e2d27a29ed04fe79eb30c"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
 version = "1.6.38+0"
 
+[[libsixel_jll]]
+deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Pkg", "libpng_jll"]
+git-tree-sha1 = "d4f63314c8aa1e48cd22aa0c17ed76cd1ae48c3c"
+uuid = "075b6546-f08a-558a-be8f-8157d0f608a5"
+version = "1.10.3+0"
+
 [[libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
 git-tree-sha1 = "b910cb81ef3fe6e78bf6acee440bda86fd6ae00c"
@@ -2514,15 +2521,16 @@ version = "1.4.1+0"
 
 # ╔═╡ Cell order:
 # ╠═78142762-ae33-11ed-3e6b-75b2fc3af2b5
-# ╠═9cb64897-e862-444b-8435-54a90fc8690c
-# ╠═f03578ab-8ab0-4564-b7e3-6c368b61eb5a
 # ╠═668bb938-f4e3-473c-aced-599a759ba645
-# ╠═a4aae317-549d-439b-9bc2-f378e1ef5834
+# ╠═9cb64897-e862-444b-8435-54a90fc8690c
+# ╟─7673c798-7a6a-4ed4-b549-bffd1294a174
+# ╠═619d4516-f658-413c-adb2-72a88945acb8
 # ╠═bf268a10-ac94-452a-8436-834e7befa111
-# ╟─3f814e35-543b-47e6-9b05-c4409de5d02e
+# ╠═3f814e35-543b-47e6-9b05-c4409de5d02e
 # ╠═5c9f12a6-01a8-4a85-a8b4-93cad94bff2a
-# ╠═f0331894-62dc-48fb-825f-cbc7704bf4d0
-# ╠═16f9ddbf-7615-479a-a65e-2c50e1d5dcde
+# ╠═889b40f6-eeb3-4284-a145-36b3f9c52324
+# ╠═02ebd0c2-448d-4b7c-b386-08dc36b6da54
+# ╠═3ff1c522-ab51-4c2a-8d5e-06b376e242cd
 # ╟─cf5d17bc-900a-4420-a863-dbbf8b64d54a
 # ╠═b94e4c8c-5335-4e99-b92a-28d5a5b00b1b
 # ╠═1f1d6b11-6d87-4ff2-81c7-0f2ba2ceffec
@@ -2566,7 +2574,5 @@ version = "1.4.1+0"
 # ╠═6732a55d-2ae3-43d2-b229-a404d8a54a15
 # ╠═97514545-2661-40cd-9127-2d13df72dd0f
 # ╠═a52e86bb-5ad3-4405-8f12-4a23982e69f3
-# ╠═2fbedeb7-9e2b-4a83-9008-206c542b7f92
-# ╠═ab709e50-3caf-44ca-81ec-49b48f7dff3c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
