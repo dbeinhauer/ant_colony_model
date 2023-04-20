@@ -45,7 +45,7 @@ Při analýze (TODO: dopsat vysledky analyzy)
 %---------------------------------------------------------------------------
 %               the main text of your paper begins here
 %---------------------------------------------------------------------------
-\section*{Úvod}
+\section{Úvod}
 
 Kolektivní chování řady druhů hmyzu, mezi než patří například mravenci,
 je charakteristické komplexností a vysokou koordinovaností jedinců. Kolonie
@@ -69,7 +69,7 @@ schopnosti dopředu detekovat cílovou destinaci na celkovém množství potravy
 dopravené do hnízda v průběhu simulace. 
 
 
-\section*{Matematický model}
+\section{Matematický model}
 Při návrhu modelu jsme se zaměřili především na jednoduchou architekturu s
 malým množstvím snadno pochopitelných parametrů pro jednodušší analýzu 
 fungování modelu, který vhodně popíše chování mravenců při hledání potravy.
@@ -79,7 +79,7 @@ vypouštění feromonu co nejvíce optimalizovat trasu pro zásobování hnízda
 potravou. V modelu je dále možné zkoumat různé varianty map s různě 
 rozmístěnými překážkami, hnízdy i potravou.
 
-\section*{Výsledky}
+\section{Výsledky}
 
 V analýze modelu jsme se zaměřili především na chování mravenců v různých
 variantách prostředí. Dále jsme se zaměřili na závislost počtu
@@ -87,7 +87,7 @@ jedinců (parametr $n$) a maximální vzdálenosti pro detekci hledaného
 objektu (parametr $d$). Zbylé parametry jsme zvolili pevně na základě
 porovnávání výsledků pro různé hodnoty. 
 
-\subsection*{Varianty map}
+\subsection{Varianty map}
 Pro analýzu modelu jsme zvolili celkem 6 variant mapy s účelem otestovat
 chování modelu v prostředích s odlišnou charakteristikou. Zvolili jsme 
 jednotnou velikost mřížky prostředí, jež je rovna $100 \times 100$.
@@ -121,45 +121,252 @@ nabízí grafické znázornění rozložení variant prostředí.
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.9\linewidth]{images/maze_variants.pdf}
-  \caption{Zobrazení variant prostředí modelu použité v experimentech. 
-  Barevně rozlišujeme objekty v prostředí. Zeleně jsou označeny
-  bloky potravy, červeně hnízda, fialově překážky na mapě, černě 
-  je označena volná pozice bez speciálního objektu. Poznamenejme, že
-  varianty \texttt{var-2}, \texttt{var-3}, \texttt{var-4}
-  a \texttt{var-5} jsou koncipovány jako labyrinty a cíleně je zde část
-  mapy nedosažitelná (ohraničená překážkami).}
+  \includegraphics[width=0.98\linewidth]{images/maze_variants.pdf}
+  \caption{Zobrazení variant prostředí modelu použitých v experimentech. 
+  Barevně rozlišujeme objekty v prostředí (viz. legenda). 
+  Poznamenejme, že varianty \texttt{var-2}, \texttt{var-3}, 
+  \texttt{var-4} a \texttt{var-5} jsou koncipovány jako labyrinty a 
+  cíleně je zde část mapy nedosažitelná (ohraničená překážkami).}
   \label{fig:map_variants}
 \end{figure} 
 
-\subsection*{Porovnání variant prostředí}
-
-Během experimentů jsme porovnávali především úspěšnost sesbírání potravy 
-mravenci v různých variantách prostředí s různým počtem mravenců a různou
-vzdáleností detekce hledaného objektu. 
 
 
-% TODO: vsechny labely obrazku nize
+\subsection{Porovnání variant prostředí}
+\label{subsec:variant_comparision}
+
+V rámci ošetření fungování modelu a pochopení strategie chování 
+mravenců jsme nejprve spustili 4000 iterací simulace modelu na všech 
+variantách prostředí pro 400 mravenců (parametr $n$) a pro maximální
+vzdálenost detekce 10 (parametr $d$). Hodnoty parametrů $n$ a $d$ jsme zvolili tak, aby problém sbírání
+potravy nebyl příliš jednoduchý a nezajišťoval vždy téměř stoprocentní
+sesbírání potravy (vysoké hodnoty parametrů $n$ a $d$). Zároveň však
+požadujeme, aby chování mravenců nebylo příliš náhodné 
+(příliš nízké hodnoty parametrů $n$ a $d$). Na základě opakovaného 
+spouštění a pozorování chování simulace, vypozorované především
+z animací simulace pro různé hodnoty parametrů $n$ a $d$, 
+jsme se rozhodli pro volbu parametrů popsanou výše. Zbylé parametry 
+jsme nastavili na hodnoty popsány v části 
+(\ref{subsec:experiment_describtion}). S takto zvolenými parametry 
+jsme následně pozorovali chování modelu především na základě 
+rozložení hladin feromonů a animací pohybu mravenců v různých 
+variantách prostředí. Na obrázcích (\ref{fig:pheromones_300}), 
+(\ref{fig:pheromones_1000}) a (\ref{fig:pheromones_4000}) 
+mužeme nahlédnout na hladiny feromonů na 
+různých pozicích v daných prostředích po $300$, $1000$ a $4000$ 
+iteracích simulace modelu. Pro lepší pochopení je vhodné porovnat 
+tyto obrázky s návrhy jednotlivých prostředí znázorněných na obrázku
+(\ref{fig:map_variants}).
+
+Obecně u všech variant pozorujeme vyšší koncentraci feromonu typu
+\texttt{food} v okolí hnízda a feromonu typu \texttt{nest} v 
+okolí zdrojů potravy. Tato vlastnost je pravděpodobně dána 
+vyšší koncentrací mravenců mířících k potravě v okolí hnízda 
+(všichni mravenci vyrážejí hledat potravu ze stejného mraveniště) a 
+naopak vyšší koncentrací vracejících se mravenců v okolí zdroje
+potravy (z analogického důvodu jako v případě vyrážejících mravenců).
+
+Varianty \texttt{var-0} a \texttt{var-1} se liší pouze v rozestavení 
+překážek okolo zdrojů potravy. Rozložení hladin feromonů je mezi
+těmito variantami především v počáteční fázi simulace velmi podobné
+(viz. obrázek (\ref{fig:pheromones_300}) varianty (a) a (b)). 
+Po uplynutí více iterací 
+simulace však můžeme nahlédnout, že v případě varianty \texttt{var-1}
+je hladina feromonu typu \texttt{food} 
+rovnoměrněji rozprostřena v prostředí než u
+varianty \texttt{var-0} (viz. obrázky (\ref{fig:pheromones_1000}) a 
+(\ref{fig:pheromones_4000}) varianty (a) a (b)). Tuto skutečnost
+si odůvodňujeme vyšší mírou náhodného prohledávání prostředí mravenci
+v případě varianty \texttt{var-1}, jelikož nalezení cesty k potravě
+je náročnější z důvodu umístění překážky téměř okolo celého obvodu
+zdrojů potravy. Tato hypotéza je podpořena také simulacemi (TODO: odkaz
+na simulace).
+
+Podobně jako v předchozím přídadě stojí za zmínku porovnat chování
+podobných variant \texttt{var-2}, \texttt{var-3} a \texttt{var-5}. 
+V případě 300 a 1000 iterací jsou tyto varianty od sebe téměř 
+nerozlišitelné (viz. obrázky (\ref{fig:pheromones_300}) a 
+(\ref{fig:pheromones_1000}) varianty (c), (d) a (f)). Po 4000
+iteracích se však rozdíly v hladinách feromonů již výrazně 
+odlišují (viz. (\ref{fig:pheromones_4000}) varianty (c), (d) a (f)).
+Při porovnání variant \texttt{var-2} a \texttt{var-5}, jež se liší
+pouze slepým ramenem ve variantě \texttt{var-5}, můžeme sledovat, že
+ve variantě \texttt{var-5} je pozorovatelně vyšší hladina feromonu
+typu \texttt{nest} v ramenu se zdrojem potravy oproti oběma ramenům
+ve variantě \texttt{var-2}. Tato skutečnost pravděpodobně vypovídá
+o vyšší koncentraci mravenců v rameni s potravou v porovnání s oběma
+rameny s potravou v případě \texttt{var-2} a je tedy i částečným 
+ověřením správného chování mravenců (očekáváme, že se budou 
+spíše koncentrovat v okolí potravy než ve slepém rameni). Podobný jev
+lze pozorovat i v případě \texttt{var-3}, lišící se od \texttt{var-2}
+v poměru jednotlivých délek ramen bludiště (křižovatka je blíže 
+hnízdu a zdroje potravy dále od křižovatky). I v tomto případě jsou
+koncentrace feromonů přibližně stejné v obou větvích (mírný rozdíl 
+v koncentracích přisuzujeme náhodnému výběru mezi větvemi). Zajímavé
+je porovnání hladin feromonu typu \texttt{nest} mezi variantami 
+\texttt{var-2} a \texttt{var-3} v ramenech se zdrojem potravy. 
+V případě \texttt{var-2} je tato hladina výrazně nižší než v případě
+\texttt{var-3}. Tento jev je pravděpodobně způsoben rozdílnou délkou 
+ramen. V případě kratších ramen se zdrojem potravy 
+(\texttt{var-2}) mravenci velmi rychle zamíří ke křižovatce ramen,
+kde je typicky vyšší koncetrace feromonu, protože se zde slévají
+hladiny feromonu mravenců navrácejících se z obou ramen. Naopak v 
+případě delších ramen s potravou (\texttt{var-3}). Nejsou mravenci
+tak silně přitahování ke křižovatce a mohou tvořit cyklické skupinky
+navzájem se ovlivňujících navrácejících mravenců v jednotlivých 
+ramenech. Problém vzniku cyklických skupinek navzájem se ovlivňujících
+mravenců lze také pozorovat na všech variantách \texttt{var-2}, 
+\texttt{var-3} i \texttt{var-5} v místě křižovatky ramen, kde je typicky
+vysoká koncetrace jak feromonu typu \texttt{nest}, tak i typu 
+\texttt{food}, což svědčí o velké koncentraci mravenců navrácejících
+se do hnízda i hledajících potravu. Popsané vlastnosti chování mravenců
+ve variantách \texttt{var-2}, \texttt{var-3} a \texttt{var-5} jsou
+podpořeny také i animacemi simulací (viz. TODO: odkaz na animace).
+
+Poslední varianta \texttt{var-4} prokazuje podobné vlastnosti 
+jaké jsme popisovali v předchozích variantách 
+\texttt{var-2}, \texttt{var-3} a \texttt{var-5}. Můžeme zde však ještě 
+výrazněji nahlédnout na tvoření cyklických skupinek navrácejících
+se mravenců, jenž je způsobeno více zdroji potravy, menšími skupinkami
+mravenců v jednotlivých větvích a tedy také větším vlivem mezi 
+jednotlivými mravenci (viz. obrázky (\ref{fig:pheromones_300}), 
+(\ref{fig:pheromones_1000}) a (\ref{fig:pheromones_4000}) varianta (e)
+a animace TODO: reference na animaci).
+
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.98\linewidth]{images/pheromone_levels_300.pdf}
+  \caption{Hladiny feromonů obou typů v různých variantách prostředí 
+  po 300 iteracích algoritmu. 
+  Absolutní hodnota hladiny feromonu značí součet hladin obou variant
+  feromonů (1 je maximální hladina). Znaménko hladiny feromonu je dáno
+  feromonem s vyšší koncentrací (záporné (červené odstíny) - vyšší 
+  koncentrace feromonu typu \texttt{nest}, kladné - více feromonu typu
+  \texttt{food}). Oblasti se žlutým odstínem jsou oblasti s vysokou 
+  koncentrací obou typů feromonů.}
+  \label{fig:pheromones_300}
+\end{figure}
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.98\linewidth]{images/pheromone_levels_1000.pdf}
+  \caption{Hladiny feromonů obou typů v různých variantách prostředí 
+  po 1000 iteracích algoritmu. Význam hladiny feromonu je podrobněji
+  popsán v popisku obrázku (\ref{fig:pheromones_300}).}
+  \label{fig:pheromones_1000}
+\end{figure}
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.98\linewidth]{images/pheromone_levels_4000.pdf}
+  \caption{Hladiny feromonů obou typů v různých variantách prostředí 
+  po 4000 iteracích algoritmu. Význam hladiny feromonu je podrobněji
+  popsán v popisku obrázku (\ref{fig:pheromones_300}).}
+  \label{fig:pheromones_4000}
+\end{figure}
+
+
+
+\subsubsection{Různý počet mravenců}
+
+Jedním ze zkoumaných parametrů byl počet mravenců v modelu (parameter
+$n$), který jsme zkoumali pro nastavení parametrů popsané v části 
+(\ref{subsec:experiment_describtion}) a pro nastavení parametru maximální
+hloubky detekce na $d=10$.
+
+Nahlédli jsme, že volba parametru $n$ výrazně neovlivňuje 
+množství sesbírané potravy v různých variantách prostředí 
+(viz. obrázek (\ref{fig:num_ants_means})). Na základě tohoto grafu 
+můžeme také usuzovat, že v případě proměnlivého parametru $n$ s 
+nami zvoleným nastavením parametrů, jsou nejobtížnější varianty pro
+sesbírání potravy varianty \texttt{var-2}, \texttt{var-3} a \texttt{var-5}.
+Naopak v případě variant \texttt{var-0}, \texttt{var-1} a \texttt{var-4}
+jsou v průměru sesbírány téměř veškeré zásoby potravy v prostředí.
+Překvapivé jsou především výsledky pro \texttt{var-4}, které prokazují
+dokonce lepší výsledky něž v případě \texttt{var-1}. Tento fakt je 
+částečně v rozporu s poznatky z části (\ref{subsec:variant_comparision}),
+které odhadovaly zacyklení mravenců v okolí křižovatek a pravděpodobně
+také snížení celkového množství sesbírané potravy (nějací mravenci
+by vlivem zacyklení nikdy nedorazili do cíle). Důvodem rozdílných 
+výsledků je pravděpodobně vyšší počet mravenců v průměrném případě 
+oproti zkoumanému počtu $n=400$ ve zmíněné části.
+
+Poznatky zmíněné výše jsou také podpořeny závislostí sesbírané potravy 
+na počtu mravenců při různých variantách (viz. obrázky 
+(\ref{fig:num_ants_together}) a (\ref{fig:num_ants_separated})).
+Na základě těchto závislostí můžeme nahlédnout, že při hodnotě 
+parametru $n$ okolo hodnoty $500$ a výše, již téměř nedochází k nárustu
+sesbírané potravy. Typicky buď dochází k sesbírání veškeré potravy, 
+nebo k ustálení na určité části celkového počtu a zbylou část
+potravy téměř není možné sesbírat ani s vyšší počtem mravenců. 
+K tomuto jevu dochází především při již zmíněných variantách 
+\texttt{var-2}, \texttt{var-3} a \texttt{var-5}, zde pravděpodobně
+dochází k zacyklení části navrácejících se mravenců na křižovatkách
+ramen a tím pádem k nemožnosti dopravit potravu do hnízda. Nejhůře v 
+tomto ohledu dopadla varianta \texttt{var-3} s delšími rameny 
+ke zdrojům potravy, kde pravděpodobně dochází k zacyklení mravenců ještě 
+v jednotlivých ramenech. Nedosáhnou tak často ani křižovatky, kde je 
+vyšší šance odtržení od cyklické skupinky a návratu do hnízda, jelikož
+je hnizdo v křižovatce blíže a není schováno za překážkou. Je tak možné,
+že bude v dostatečné blízkosti pro detekci mravencem a jeho odtržení od
+vlivu dalších mravenců. Dalším ze zajímavých poznatků je vyšší závislost
+na parametru $n$ ve variantě \texttt{var-1}, způsobena pravděpodobně
+malým prostorem pro průchod mravenců k překážce.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.98\linewidth]{images/num_ants_variants_means.pdf}
+  \caption{Znázornění distribuce množství sesbírané potravy mravenci 
+  při různém počtu mravenců (parametr $n$).}
+  \label{fig:num_ants_means}
+\end{figure}
 
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.98\linewidth]{images/num_ants_variants_together.pdf}
-  \caption{}
+  \caption{Porovnání závislostí množství sesbírané potravy na počtu 
+  mravenců $n$ mezi variantami prostředí.}
   \label{fig:num_ants_together}
 \end{figure}
 
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.98\linewidth]{images/num_ants_variants_separated.pdf}
-  \caption{}
+  \caption{Závislosti množství sesbírané potravy na počtu 
+  mravenců $n$ při různých variantách prostředí.}
   \label{fig:num_ants_separated}
 \end{figure}
 
+
+
+\subsubsection{Různá vzdálenost detekce objektu}
+
+Posledním zkoumaným parametrem je závislost maximální vzdálenosti
+pro detekci cílového objektu (potrava, hnízdo) (parametr $d$).
+Nastavení parametrů je podrobněji popsáno v části 
+(\ref{subsec:experiment_describtion}). Počet mravenců jsme zvolili 
+$n=400$.
+
+Na rozdíl od parametru $n$ je množství sesbírané potravy především
+ve variantách \texttt{var-4} a \texttt{var-5} výrazně závislé na
+volbě parametru $d$ (viz. obrázek (\ref{fig:search_depth_means})).
+Na základě průměrného množství sesbírané potravy dopadla nejhůře
+varianta \texttt{var-2} následována \texttt{var-3} a \texttt{var-5}.
+
+Vyšší závislost množství sesbírané potravy můžeme 
+
+(TODO: dopsat veci ke grafu)
+
+
+
+% TODO: vsechny labely obrazku nize
+
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.98\linewidth]{images/num_ants_variants_means.pdf}
+  \includegraphics[width=0.98\linewidth]{images/search_depth_variants_means.pdf}
   \caption{}
-  \label{fig:num_ants_means}
+  \label{fig:search_depth_means}
 \end{figure}
 
 \begin{figure}[tb]
@@ -176,36 +383,6 @@ vzdáleností detekce hledaného objektu.
   \label{fig:search_depth_separated}
 \end{figure}
 
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=0.98\linewidth]{images/search_depth_variants_means.pdf}
-  \caption{}
-  \label{fig:search_depth_means}
-\end{figure}
-
-
-
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=0.9\linewidth]{images/pheromone_levels_300.pdf}
-  \caption{}
-  \label{fig:pheromones_300}
-\end{figure}
-
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=0.9\linewidth]{images/pheromone_levels_1000.pdf}
-  \caption{}
-  \label{fig:pheromones_1000}
-\end{figure}
-
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=0.9\linewidth]{images/pheromone_levels_4000.pdf}
-  \caption{}
-  \label{fig:pheromones_4000}
-\end{figure}
-
 
 
 
@@ -215,9 +392,9 @@ TODO: popsat zavislost poctu mravencu a hloubky prohledavani na poctu potravy
 
 
 
-\section*{Metody}
+\section{Metody}
 
-\subsection*{Návrh modelu}
+\subsection{Návrh modelu}
 Model staví na návrhu z práce \citet{jones2010characteristics}
 modelující formování transportních drah plísně \emph{Physarum polycephalum}
 pomocí chemotaxe. Tento model jsme zvolili, jelikož je založen na podobných 
@@ -338,7 +515,7 @@ Tabulce (\ref{table:parametry}) obsahuje podrobnější popis parametrů modelu.
   \caption{Seznam parametrů modelu.} \label{table:parametry} 
 \end{table}
 
-\subsection*{Analýza modelu}
+\subsection{Analýza modelu}
 
 Veškeré zdrojové kódy implementace modelu a pro analýzu výsledků společně s
 výsledky experimentů a jejich podrobným nastavením jsou k nahlédnutí v 
@@ -347,7 +524,7 @@ githubovém repozitáři
 naimplementován v jazyce Julia v prostředí Pluto. Výsledky byly analyzovány
 za pomoci jazyku Python v prostředí Jupyter Lab.
 
-\subsection*{Výběr parametrů}
+\subsection{Výběr parametrů}
 V analýze modelu jsme se zaměřili pouze na vybrané parametry modelu. Zbylé
 parametry jsme museli vhodně zvolit. Pro ohodnocení kvality volby
 parametrů jsme použili množství sesbírané potravy v základním prostředí
@@ -431,7 +608,8 @@ grafy (\ref{fig:grid_search_2_fade}) a (\ref{fig:grid_search_2_difusion}).
 \end{figure}
 
 
-\subsection*{Popis experimentů}
+\subsection{Popis experimentů}
+\label{subsec:experiment_describtion} 
 Hlavní část experimentů byla zaměřena na charakteristiku chování mravenců v
 různých variantách prostředí s různým počtem jedinců (parametr $n$ v rozmezí 
 $(0, 50)$) a různou maximální vzdáleností pro detekci hledaného objektu 

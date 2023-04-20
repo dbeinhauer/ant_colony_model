@@ -837,6 +837,7 @@ function draw_maze_variants(;
 						food_coordinates = food_variants[variant_index],
 						nest_coordinates = nest_variants[variant_index],
 						obstacle_coordinates = obstacle_variants[variant_index],
+						search_depth = 10,
 					)
 				
 				AntsModel.sim!(
@@ -1830,9 +1831,9 @@ version = "0.8.1+0"
 
 [[OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
-git-tree-sha1 = "e9d68fe4b5f78f215aa2f0e6e6dc9e9911d33048"
+git-tree-sha1 = "5b3e170ea0724f1e3ed6018c5b006c190f80e87d"
 uuid = "4d8831e6-92b7-49fb-bdf8-b643e874388c"
-version = "1.3.4"
+version = "1.3.5"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1934,9 +1935,9 @@ version = "1.3.4"
 
 [[Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Preferences", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SnoopPrecompile", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "186d38ea29d5c4f238b2d9fe6e1653264101944b"
+git-tree-sha1 = "5434b0ee344eaf2854de251f326df8720f6a7b55"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.38.9"
+version = "1.38.10"
 
 [[PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
