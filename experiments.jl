@@ -136,22 +136,6 @@ function draw_map(
 	end
 end
 
-# ╔═╡ 02ebd0c2-448d-4b7c-b386-08dc36b6da54
-# draw_maze_variants(;
-# 	draw_pheromone = true,
-# 	title = "Hladina feromonu za 1000 iterací modelu",
-# 	num_iterations = 1000,
-# 	# filename = "template1/images/pheromone_levels_1000.pdf",
-# )
-
-# ╔═╡ 3ff1c522-ab51-4c2a-8d5e-06b376e242cd
-# draw_maze_variants(;
-# 	draw_pheromone = true,
-# 	title = "Hladina feromonu za 4000 iterací modelu",
-# 	num_iterations = 4000,
-# 	# filename = "template1/images/pheromone_levels_4000.pdf",
-# )
-
 # ╔═╡ cf5d17bc-900a-4420-a863-dbbf8b64d54a
 # begin
 # 	plot_array = []
@@ -901,19 +885,25 @@ function draw_maze_variants(;
 
 
 	# Set main title of the figure.
-	main_title = Label(
-			fig[1:2, 1:4, Top()],
-			title,
-			fontsize=25,
-	        padding=(0, 0, 30, 0),
-		)
+
+	# <==== Uncomment to make the title possible:
+	
+	# main_title = Label(
+	# 		fig[1:2, 1:4, Top()],
+	# 		title,
+	# 		fontsize=25,
+	#         padding=(0, 0, 30, 0),
+	# 	)
+
+	# <==== Uncomment to make the title possible:
+
 
 	# Set labels for each of the map variant
 	[Label(
-		fig[j, i, Top()], 
-		"($(letters[i, j])) var-$((j-1)*width + i - 1)",
-		padding=(0, 0, 0, 0),
-		valign=:bottom,
+		fig[j, i, TopLeft()], 
+		# "($(letters[i, j])) var-$((j-1)*width + i - 1)",
+		"$(letters[i, j])",
+		fontsize=25,
 		) for i = 1:width, j = 1:height
 	]
 	
@@ -929,16 +919,32 @@ end
 
 # ╔═╡ 5c9f12a6-01a8-4a85-a8b4-93cad94bff2a
 draw_maze_variants(;
-	title = "Varianty prostředí modelu",
-	# filename = "template1/images/maze_variants.pdf",
+	# title = "Varianty prostředí modelu",
+	filename = "template1/images/maze_variants.pdf",
 	)
 
 # ╔═╡ 889b40f6-eeb3-4284-a145-36b3f9c52324
 draw_maze_variants(;
 	draw_pheromone = true,
-	title = "Hladina feromonu za 300 iterací modelu",
+	# title = "Hladina feromonu za 300 iterací modelu",
 	num_iterations = 300,
-	# filename = "template1/images/pheromone_levels_300.pdf",
+	filename = "template1/images/pheromone_levels_300.pdf",
+)
+
+# ╔═╡ 02ebd0c2-448d-4b7c-b386-08dc36b6da54
+draw_maze_variants(;
+	draw_pheromone = true,
+	# title = "Hladina feromonu za 1000 iterací modelu",
+	num_iterations = 1000,
+	filename = "template1/images/pheromone_levels_1000.pdf",
+)
+
+# ╔═╡ 3ff1c522-ab51-4c2a-8d5e-06b376e242cd
+draw_maze_variants(;
+	draw_pheromone = true,
+	# title = "Hladina feromonu za 4000 iterací modelu",
+	num_iterations = 4000,
+	filename = "template1/images/pheromone_levels_4000.pdf",
 )
 
 # ╔═╡ 6732a55d-2ae3-43d2-b229-a404d8a54a15
@@ -1351,15 +1357,15 @@ version = "0.1.4"
 
 [[GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
-git-tree-sha1 = "0635807d28a496bb60bc15f465da0107fb29649c"
+git-tree-sha1 = "011a22022ed2fb0352a9bded0fa9d3793a8db362"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.72.0"
+version = "0.72.1"
 
 [[GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "99e248f643b052a77d2766fe1a16fb32b661afd4"
+git-tree-sha1 = "7ea8ead860c85b27e83d198ea54bb2f387db9fc3"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.72.0+0"
+version = "0.72.1+1"
 
 [[GeoInterface]]
 deps = ["Extents"]
@@ -1587,9 +1593,9 @@ version = "1.3.0"
 
 [[Latexify]]
 deps = ["Formatting", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Printf", "Requires"]
-git-tree-sha1 = "2422f47b34d4b127720a18f86fa7b1aa2e141f29"
+git-tree-sha1 = "ee342fcc2b8762c43a60dfbbf73bc2258703af19"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.15.18"
+version = "0.15.19"
 
 [[LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]

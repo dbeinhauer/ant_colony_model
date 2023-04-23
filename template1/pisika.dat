@@ -43,13 +43,13 @@
 
 % for section formatting style
 \makeatletter
-\renewcommand\section{\@startsection
-   {section}{1}{0pt}%
-   {-\baselineskip}%
-   {0.1\baselineskip}%
-   {\normalfont\bfseries}}%
-\makeatother
-\renewcommand\thesection{\arabic{section}}
+% \renewcommand\section{\@startsection
+%    {section}{1}{0pt}%
+%    {-\baselineskip}%
+%    {0.1\baselineskip}%
+%    {\normalfont\bfseries}}%
+% \makeatother
+% \renewcommand\thesection{\arabic{section}}
 
 % for the figure and tables, captions
 \usepackage{booktabs}
@@ -70,21 +70,21 @@
 {
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
-\fancyhf[l]{{\scshape Submitted to Pisika}}
+\fancyhf[l]{}
 \fancyhf[c]{ }
 \fancyhf[r]{ }
-\fancyfoot[l]{\scshape Samahang Pisika ng Pilipinas}
+\fancyfoot[l]{}
 \fancyfoot[c]{1}
-\fancyfoot[r]{\scshape Physics Society of the Philippines}
+\fancyfoot[r]{}
 }
 
 % styling for the second page onwards
 \renewcommand{\headrulewidth}{0.1pt}
 \renewcommand{\footrulewidth}{0.1pt}
-\fancyhf[l]{\small{ Submitted to Pisika} }
+\fancyhf[l]{}
 \fancyhf[r]{\small \scshape \ShortAuthorList}
-\fancyhf[c]{ \small }
-\fancyfoot[l]{\small \scshape Samahang Pisika ng Pilipinas}
+\fancyhf[c]{}
+\fancyfoot[l]{}
 \fancyfoot[c]{\small \thepage}
 \fancyfoot[r]{\small }
 \pagestyle{fancy}
