@@ -1,0 +1,20 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Ant Colony Model
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: David
+    family-names: Beinhauer
+    email: david.beinhauer@email.cz
+identifiers:
+  - type: url
+    value: 'https://github.com/dbeinhauer/ant_colony_model'
+repository-code: >-
+  https://github.com/dbeinhauer/ant_colony_model/tree/main/source
+version: 0.0.1
+date-released: '2023-04-23'
