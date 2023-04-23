@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "ant-colony-model"
+version = "0.1.0"
+description = ""
+authors = ["David Beinhauer <david.beinhauer@email.cz>"]
+readme = "README.md"
+packages = [{include = "ant_colony_model"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+seaborn = "^0.12.2"
+numpy = "^1.24.2"
+pandas = "^1.5.3"
+jupyter = "^1.0.0"
+jupyterlab = "^3.6.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
