@@ -1,4 +1,0 @@
-for VAR in {1..5}; do  touch "variant_"$VAR"_depth.jl"; touch "variant_"$VAR"_ants.jl"; done
-
-for VAR in {1..5}; do  cp ../experiments.jl "variant_"$VAR"_depth.jl"; cp ../experiments.jl "variant_"$VAR"_ants.jl"; done
-
