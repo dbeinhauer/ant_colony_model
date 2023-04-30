@@ -11,7 +11,7 @@
 %--------------------------------------------------------------------------
 %  fill in the paper's title, author(s), and corresponding institutions
 %--------------------------------------------------------------------------
-\providecommand{\ShortAuthorList}[0]{David Beinhauer} % use "A.~M.~Surname \textit{et al}." for more than three authors.
+\providecommand{\ShortAuthorList}[0]{David Beinhauer}
 \title{Modelování hledání potravy v mravenčích koloniích}
 \author[1,*]{David Beinhauer}
 \affil[1]{Přírodovědecká fakulta Univerzity Karlovy, Bioinformatika, Praha, Česká republika}
@@ -28,12 +28,11 @@ Chování hmyzích druhů žijících v kooperujících koloniích je dodnes
 výzvou pro vědu. Pochopení této problematiky může vést k zdokonalení řešení
 řady zdánlivě nesouvisejících problémů. V práci je představen jednoduchý
 multiagentní model mravenčí kolonie zaměřující se na problematiku shánění
-potravy v různě komplexních prostředích. Návrh modelu je inspirován prací 
-\citet{jones2010characteristics}. 
+potravy v různě komplexních prostředích. Návrh modelu je inspirován 
+prací\textsuperscript{\cite{jones2010characteristics}}. 
 Při analýze byla prokázána schopnost modelu simulace koordinované 
 spolupráce mravenců při sbírání potravy.
 
-% \keywords{}
 
 \DOI{} % do not delete this line
 \end{abstract}
@@ -54,20 +53,25 @@ mravenců například společně zajišťuje potravu pro celou populaci, buduje 
 strará se o potomky, či se brání před predátory. Pochopení tohoto chování by
 mohlo pomoci zdokonalit naše chápání řady biologických systému i nalézt
 řešení pro řadu zdánlivě vzdálených problému, mezi něž
-patří například problém obchodního cestujícího \citet{applegate2011traveling}. 
+patří například problém obchodního 
+cestujícího\textsuperscript{\cite{applegate2011traveling}}. 
 S ohledem na množství jedinců, komplexnost přirozeného prostředí a 
 nepřesnost měřících zařízeních je však exaktní studium chování a 
 organizace těchto kolonií velmi komplikované a 
 často značně nepřesné. V důsledku nárustu výpočetního výkonu se proto v 
 současnosti pro studium takto komplexních dějů stále častěji 
-využívají matematické modely. 
+využívají matematické modely\textsuperscript{\cite{drogoul1994multi}, 
+\cite{xiang2008ant}, \cite{ilie2013multi}}. 
 
 V této práci navrhujeme a analyzujeme jednoduchý multiagentní model mravenčí 
 kolonie zaměřený na problematiku shánění potravy. Model je založen na komunikaci
 mravenců pomocí vypouštění a detekce rozdílných hladin feromonu v prostředí.
-Z velké části je návrh modelu insporován prací \citet{jones2010characteristics}, 
+Z velké části je návrh modelu insporován 
+prací\textsuperscript{\cite{jones2010characteristics}}, 
 jenž studuje
-formování transportních drah plísně \emph{Physarum polycephalum}. V analytické části
+formování transportních drah plísně 
+\emph{Physarum polycephalum}\textsuperscript{\cite{durham1976control}}. 
+V analytické části
 porovnáváme chování mravenců a jejich úspěšnost při sběru potravy v různě 
 strukturovaných prostředích. Dále zkoumáme závislosti počtu jedinců a jejich 
 schopnosti dopředu detekovat cílovou destinaci na celkovém množství potravy 
@@ -469,8 +473,10 @@ modelu ošetřující tyto problematické situace.
 
 \subsection{Návrh modelu}
 \label{subsec:model_setup}
-Model staví na návrhu z práce \citet{jones2010characteristics}
-modelující formování transportních drah plísně \emph{Physarum polycephalum}
+Model staví na návrhu z 
+práce\textsuperscript{\cite{jones2010characteristics}}
+modelující formování transportních drah plísně 
+\emph{Physarum polycephalum}\textsuperscript{\cite{durham1976control}}
 pomocí chemotaxe. Tento model jsme zvolili, jelikož je založen na podobných 
 principech jako námi zkoumaný problém.
 
@@ -560,7 +566,7 @@ Kde $level_{p}(t)$ značí hladinu feromonu (platí stejná rovnice pro oba typy
 na pozici $p$ v čase $t$ a $f$ udává rychlost vyprchávání feromonu.
 
 Dále je v každém kroku simulace část koncentrace feromonu na libovolné pozici $p$ 
-rovnoměrně difundována do Moorova okolí (TODO: možná odkaz) $p$ z nějž jsou vyřazeny neplatné pozice
+rovnoměrně difundována do Moorova okolí $p$ z nějž jsou vyřazeny neplatné pozice
 (mimo mapu nebo překážky), množství difundovaného feromonu je dáno 
 příslušným parametrem.
 
@@ -596,8 +602,8 @@ Tabulka \ref{table:parametry} obsahuje podrobnější popis parametrů modelu.
 
 Veškeré zdrojové kódy implementace modelu a pro analýzu výsledků společně s
 výsledky experimentů a jejich podrobným nastavením jsou k nahlédnutí v 
-githubovém repozitáři \citet{Beinhauer_Ant_Colony_Model_2023}
-\footnote{\url{https://github.com/dbeinhauer/ant_colony_model}}. Model je 
+githubovém repozitáři\textsuperscript{\cite{Beinhauer_Ant_Colony_Model_2023}}.
+Model je 
 naimplementován v jazyce Julia v prostředí Pluto, v němž je naimplementován
 také zdrojový kód pro běh experimentů a pro vytvoření animací výsledků
 simulací. Výsledky byly analyzovány za pomoci jazyku Python v prostředí 
@@ -725,6 +731,7 @@ pevně zvolili následující hodnoty zbylých parametrů:
 
 
 % Please use pisikabst.bst. You may your own *.bib file.
+\clearpage
 \bibliographystyle{pisikabst}
 \bibliography{bibfile}
 

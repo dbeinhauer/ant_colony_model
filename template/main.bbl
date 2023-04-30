@@ -1,4 +1,4 @@
-\begin{thebibliography}{3}
+\begin{thebibliography}{7}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname bibnamefont\endcsname\relax
   \def\bibnamefont#1{#1}\fi
@@ -27,6 +27,36 @@
   \bibnamefont{and} \bibinfo{author}{\bibfnamefont{W.~J.} \bibnamefont{Cook}},
   in \emph{\bibinfo{booktitle}{The Traveling Salesman Problem}}
   (\bibinfo{publisher}{Princeton university press}, \bibinfo{year}{2011}).
+
+\bibitem[{\citenamefont{Drogoul and Ferber}(1994)}]{drogoul1994multi}
+\bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Drogoul}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Ferber}}, in
+  \emph{\bibinfo{booktitle}{Artificial Social Systems: 4th European Workshop on
+  Modelling Autonomous Agents in a Multi-Agent World, MAAMAW'92 S. Martino al
+  Cimino, Italy, July 29--31, 1992 Selected Papers 4}}
+  (\bibinfo{organization}{Springer}, \bibinfo{year}{1994}),
+  \bibinfo{pages}{2--23}.
+
+\bibitem[{\citenamefont{Xiang and Lee}(2008)}]{xiang2008ant}
+\bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{Xiang}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{H.~P.} \bibnamefont{Lee}}, \bibinfo{title}{Ant
+  colony intelligence in multi-agent dynamic manufacturing scheduling},
+  \emph{\bibinfo{journal}{Engineering Applications of Artificial Intelligence}}
+  \textbf{\bibinfo{volume}{21}}, \bibinfo{pages}{73} (\bibinfo{year}{2008}).
+
+\bibitem[{\citenamefont{Ilie and B{\u{a}}dic{\u{a}}}(2013)}]{ilie2013multi}
+\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Ilie}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{C.}~\bibnamefont{B{\u{a}}dic{\u{a}}}},
+  \bibinfo{title}{Multi-agent approach to distributed ant colony optimization},
+  \emph{\bibinfo{journal}{Science of Computer Programming}}
+  \textbf{\bibinfo{volume}{78}}, \bibinfo{pages}{762} (\bibinfo{year}{2013}).
+
+\bibitem[{\citenamefont{Durham and Ridgway}(1976)}]{durham1976control}
+\bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Durham}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Ridgway}},
+  \bibinfo{title}{Control of chemotaxis in physarum polycephalum.},
+  \emph{\bibinfo{journal}{The Journal of Cell Biology}}
+  \textbf{\bibinfo{volume}{69}}, \bibinfo{pages}{218} (\bibinfo{year}{1976}).
 
 \bibitem[{\citenamefont{Beinhauer}(2023)}]{Beinhauer_Ant_Colony_Model_2023}
 \bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{Beinhauer}},

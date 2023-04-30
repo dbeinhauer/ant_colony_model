@@ -13,6 +13,7 @@
 \usepackage[affil-it]{authblk} 			% found in preprint bundle package, http://ctan.org/pkg/preprint
 \usepackage[margin=2cm]{geometry} % paper and margin formats as set by SPP
 
+
 \parindent 0.5cm    % paragraphs indent
 
 % authblk style
@@ -54,7 +55,11 @@
 
 % for citations formatting style
 \usepackage[numbers,square,sort&compress]{natbib}
-\setlength\bibsep{1pt}
+% \setlength\bibsep{1pt}
+
+% \renewcommand{\bibname}{Refe}
+
+\setcitestyle{open={},close={}}
 
 % \bibliographystyle{naturemag}
 

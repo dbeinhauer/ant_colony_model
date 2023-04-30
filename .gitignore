@@ -1,0 +1,10 @@
+.ipynb_checkpoints
+source/.ipynb_checkpoints/
+template/.ipynb_checkpoints/
+template/*.aux
+template/*.blg
+template/*.fdb_latexmk
+template/*.log
+template/*.out
+template/*.fls
+template/*.run.xml
