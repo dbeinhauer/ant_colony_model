@@ -8,3 +8,4 @@ template/*.log
 template/*.out
 template/*.fls
 template/*.run.xml
+template/main.synctex.gz
