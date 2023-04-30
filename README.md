@@ -5,7 +5,7 @@ Charles University.
 The project consists of model of the artificial ant colony and its analysis.
 
 The analysis of the project is available 
-[here](https://github.com/dbeinhauer/ant_colony_model/blob/main/template/main.pdf).
+[here](https://github.com/dbeinhauer/ant_colony_model/blob/main/template/main.pdf) (only in Czech).
 
 
 # Structure of The Repository
