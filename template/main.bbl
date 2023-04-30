@@ -12,13 +12,6 @@
 \providecommand{\bibinfo}[2]{#2}
 \providecommand{\eprint}[1]{\href{http://arxiv.org/abs/#1}{arXiv:#1}}
 
-\bibitem[{\citenamefont{Jones}(2010)}]{jones2010characteristics}
-\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jones}},
-  \bibinfo{title}{Characteristics of pattern formation and evolution in
-  approximations of physarum transport networks},
-  \emph{\bibinfo{journal}{Artificial life}} \textbf{\bibinfo{volume}{16}},
-  \bibinfo{pages}{127} (\bibinfo{year}{2010}).
-
 \bibitem[{\citenamefont{Applegate et~al.}(2011)\citenamefont{Applegate, Bixby,
   Chv{\'a}tal, and Cook}}]{applegate2011traveling}
 \bibinfo{author}{\bibfnamefont{D.~L.} \bibnamefont{Applegate}},
@@ -50,6 +43,13 @@
   \bibinfo{title}{Multi-agent approach to distributed ant colony optimization},
   \emph{\bibinfo{journal}{Science of Computer Programming}}
   \textbf{\bibinfo{volume}{78}}, \bibinfo{pages}{762} (\bibinfo{year}{2013}).
+
+\bibitem[{\citenamefont{Jones}(2010)}]{jones2010characteristics}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Jones}},
+  \bibinfo{title}{Characteristics of pattern formation and evolution in
+  approximations of physarum transport networks},
+  \emph{\bibinfo{journal}{Artificial life}} \textbf{\bibinfo{volume}{16}},
+  \bibinfo{pages}{127} (\bibinfo{year}{2010}).
 
 \bibitem[{\citenamefont{Durham and Ridgway}(1976)}]{durham1976control}
 \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Durham}} \bibnamefont{and}

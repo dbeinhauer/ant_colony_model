@@ -1,9 +1,7 @@
 #!/bin/bash
 
-
 echo $1
 echo $2
-# echo $3
 
 for file in $(ls $1)
 do 
